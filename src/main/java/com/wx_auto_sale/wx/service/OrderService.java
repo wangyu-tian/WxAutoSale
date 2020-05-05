@@ -103,7 +103,8 @@ public class OrderService {
                     //商品折扣金额计算
                     discountAmountTemp = discountAmount(dto.getDiscountOutDto(), dto.getPrice(), discountAmountTemp, String.valueOf(jsonGoods.get(key)));
                     discountAmount = discountAmount.add(discountAmountTemp);
-                    //count;price;orderAmount;discountAmount;name;imageUrl:discountMemo
+                    //拼接订单信息
+                    //count数量;price单价;orderAmount商品原价;discountAmount商品折扣价;name商品名称;imageUrl商品地址:discountMemo商品折扣描述
                     jsonGoodsNew.put(key,jsonGoods.get(key)+";"+dto.getPrice()+";"+orderAmountTemp+";"
                             +discountAmountTemp+";"+dto.getName()+";"+dto.getImageUrl()+";"+(dto.getDiscountOutDto()==null?"":dto.getDiscountOutDto().getMemo()));
                     goodNames+=dto.getName()+",";
@@ -211,7 +212,7 @@ public class OrderService {
                 .eq(OrderEntity::getUId, uId)
                 .orderBy(sqlWrapper.newOrderByModel(OrderEntity::getCreateDate, SqlWrapperConfig.Order.DESC));
         Pageable pageable = PageRequest.of(currentPage,pageSize);
-        //滑动刷新不需要查询总数
+        //分页查询
         Page<OrderEntity> page = jpaUtil.pageWrapper(sqlWrapper,pageable);
         List<OrderOutDto> orderOutDtoList = BeanUtils.batchModel(page.getContent(),OrderOutDto.class);
         PageDto<List<OrderOutDto>> pageDto = new PageDto<>(page.getTotalElements()
