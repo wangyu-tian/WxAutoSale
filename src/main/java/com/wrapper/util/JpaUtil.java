@@ -38,16 +38,30 @@ public class JpaUtil{
   public <T> List<T> list(String sql, Map<String, Object> params, Class<T> requiredType) {
     //String hql = "select o.uuid,o.name from UserModel o where 1=1 and o.uuid=:uuid";
     Query query = em.createQuery(sql);
-    if (params != null) {
-      for (String key : params.keySet()) {
-        query.setParameter(key, params.get(key));
-      }
-    }
+    setParams(query,params);
     return query.getResultList();
   }
 
   public <T> List<T> list(String sql, Map<String, Object> params) {
     return list(sql,params,null);
+  }
+  public <T> T one(String sql, Map<String, Object> params) {
+    Query query = em.createQuery(sql);
+    setParams(query,params);
+    query.setMaxResults(1);
+    List<T> dataList = query.getResultList();
+    if(CollectionUtils.isEmpty(dataList)){
+      return null;
+    }
+    return dataList.get(0);
+  }
+
+  private void setParams(Query query,Map<String, Object> params){
+    if (params != null) {
+      for (String key : params.keySet()) {
+        query.setParameter(key, params.get(key));
+      }
+    }
   }
   /**
    * 获取分页数据
@@ -60,11 +74,7 @@ public class JpaUtil{
   @SuppressWarnings("unchecked")
   public <T> Page<T> page(String sql, Map<String, Object> params, Pageable pageable, Class<T> requiredType) {
     Query query = em.createQuery(sql);
-    if (params != null) {
-      for (String key : params.keySet()) {
-        query.setParameter(key, params.get(key));
-      }
-    }
+    setParams(query,params);
     if (pageable.isPaged()) {
       query.setFirstResult((int) pageable.getOffset());
       query.setMaxResults(pageable.getPageSize());
@@ -73,11 +83,7 @@ public class JpaUtil{
      * 生成获取总数的sql
      */
     TypedQuery<Long> cQuery = (TypedQuery<Long>) em.createQuery(QueryUtils.createCountQueryFor(sql));
-    if (params != null) {
-      for (String key : params.keySet()) {
-        cQuery.setParameter(key, params.get(key));
-      }
-    }
+    setParams(cQuery,params);
     return PageableExecutionUtils.getPage(query.getResultList(), pageable, ()->executeCountQuery(cQuery));
     //return new PageImpl<T>(query.getResultList(), pageable, executeCountQuery(cQuery));
   }

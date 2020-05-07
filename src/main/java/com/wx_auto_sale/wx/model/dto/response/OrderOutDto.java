@@ -3,13 +3,6 @@ package com.wx_auto_sale.wx.model.dto.response;
 import com.alibaba.fastjson.JSONObject;
 import com.wx_auto_sale.constants.DataEnum;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.data.annotation.CreatedDate;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**

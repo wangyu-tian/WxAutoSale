@@ -11,12 +11,11 @@ import com.wx_auto_sale.utils.BeanUtils;
 import com.wx_auto_sale.utils.PermissionUtil;
 import com.wx_auto_sale.wx.model.dto.PageDto;
 import com.wx_auto_sale.wx.model.dto.request.OrderInDto;
-import com.wx_auto_sale.wx.model.dto.response.CommodityOutDto;
-import com.wx_auto_sale.wx.model.dto.response.DiscountOutDto;
-import com.wx_auto_sale.wx.model.dto.response.MerchantOutDto;
-import com.wx_auto_sale.wx.model.dto.response.OrderOutDto;
+import com.wx_auto_sale.wx.model.dto.response.*;
 import com.wx_auto_sale.wx.model.entity.OrderEntity;
+import com.wx_auto_sale.wx.model.entity.OrderUserEntity;
 import com.wx_auto_sale.wx.repository.OrderRepository;
+import com.wx_auto_sale.wx.repository.OrderUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -55,6 +54,9 @@ public class OrderService {
     @Autowired
     private GoodsService goodsService;
 
+    @Autowired
+    private OrderUserRepository orderUserRepository;
+
     public OrderOutDto uAdd(String mId, String uId, OrderInDto orderInDto) {
         //新增订单
         OrderEntity orderEntityReqNo = getOrderByRequestNo(orderInDto.getReqNo(), mId);
@@ -67,9 +69,31 @@ public class OrderService {
             orderEntity.setMsg("金额校验不合法，已自动终止");
             orderEntity.setStatus(STATUS_7.getCode());
         }
+        //保存订单
         orderRepository.save(orderEntity);
+        //保存订单用户信息数据
+        orderUserRepository.save(createOrderUser(orderEntity));
         PermissionUtil.isTrue(!isLegal, AMOUNT_IS_NOT_LEGAL);
         return BeanUtils.copyProperties(orderEntity, OrderOutDto.class);
+    }
+
+    /**
+     * 订单用户信息
+     * @param orderEntity
+     * @return
+     */
+    private OrderUserEntity createOrderUser(OrderEntity orderEntity) {
+        OrderUserEntity orderUserEntity = new OrderUserEntity();
+        orderUserEntity.setAddress(orderEntity.getAddress());
+        orderUserEntity.setCreateDate(new Date());
+        orderUserEntity.setMemo(orderEntity.getUMemo());
+        orderUserEntity.setMId(orderEntity.getMId());
+        orderUserEntity.setName(orderEntity.getName());
+        orderUserEntity.setOrderId(orderEntity.getId());
+        orderUserEntity.setUId(orderEntity.getUId());
+        orderUserEntity.setValid("1");
+        orderUserEntity.setPhone(orderEntity.getPhone());
+        return orderUserEntity;
     }
 
     /**
@@ -162,8 +186,9 @@ public class OrderService {
         PermissionUtil.isTrue(StringUtils.isEmpty(reqNo), REQUEST_NO_IS_BLANK);
         List<OrderEntity> orderEntityList = jpaUtil.wrapper(new SqlWrapper<>(OrderEntity.class)
                 .eq(OrderEntity::getReqNo, reqNo)
-                .eq(OrderEntity::getMId, mId)
-                .eq(OrderEntity::getValid, "1"));
+                .eq(OrderEntity::getMId, mId));
+                //无论是否失效，都不允许出现重复的流水号
+                //.eq(OrderEntity::getValid, "1"))
         if (orderEntityList.size() > 0) {
             return orderEntityList.get(0);
         }
@@ -219,5 +244,21 @@ public class OrderService {
                 ,page.getTotalPages()
                 ,orderOutDtoList);
         return pageDto;
+    }
+
+    /**
+     * 查询订单用户信息
+     * @param uId
+     * @param mId
+     * @return
+     */
+    public OrderUserDto findOrderUserInfoBest(String uId, String mId) {
+        SqlWrapper<OrderUserEntity> sqlWrapper = new SqlWrapper<>(OrderUserEntity.class);
+        sqlWrapper.eq(OrderUserEntity::getUId,uId)
+                .eq(OrderUserEntity::getMId,mId)
+                .eq(OrderUserEntity::getValid,"1")
+                .orderBy(sqlWrapper.newOrderByModel(OrderUserEntity::getCreateDate,SqlWrapperConfig.Order.DESC));
+        OrderUserEntity orderUserEntity = jpaUtil.one(sqlWrapper.getHql(),sqlWrapper.getParamsMap());
+        return BeanUtils.copyProperties(orderUserEntity,OrderUserDto.class);
     }
 }
