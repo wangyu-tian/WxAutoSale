@@ -17,7 +17,5 @@ public class GoodsOutDto extends BaseOutDto {
 
     private List<CommodityOutDto> commodityOutDtoList;
 
-    private boolean isTest;
-
 }
 

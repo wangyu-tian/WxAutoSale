@@ -1,11 +1,8 @@
 package com.wx_auto_sale.wx.controller;
 
-import com.wx_auto_sale.utils.BeanUtils;
 import com.wx_auto_sale.wx.model.BaseIn;
 import com.wx_auto_sale.wx.model.BaseOut;
-import com.wx_auto_sale.wx.model.dto.response.GoodsOutDto;
 import com.wx_auto_sale.wx.model.dto.response.MerchantOutDto;
-import com.wx_auto_sale.wx.model.entity.MerchantEntity;
 import com.wx_auto_sale.wx.service.MerchantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -51,7 +51,6 @@ public class GoodsService {
     public GoodsOutDto allInfo(String uId, String mId) {
         GoodsOutDto goodsOutDto = new GoodsOutDto();
         MerchantEntity merchantEntity = merchantService.getMerchantById(mId);
-        goodsOutDto.setTest(merchantEntity.isTest());
         //商品列表暂不根据用户区分
 //        UserEntity userEntity = userService.getUserById(uId,null);
 

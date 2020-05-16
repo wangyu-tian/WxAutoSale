@@ -57,8 +57,6 @@ public class MerchantEntity {
 
     private Date dDateEnd;
 
-    private boolean isTest;
-
     @CreatedDate
     private Date createDate;
 

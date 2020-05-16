@@ -104,8 +104,9 @@ public class UserService {
     }
 
     /**
-     * 获取用户信息
+     * 获取用户信息 任意一个都可查
      * @param uId
+     * @param wId
      * @return
      */
     public UserEntity getUserById(String uId,String wId) {
@@ -114,7 +115,8 @@ public class UserService {
         List<UserEntity> userEntityList = jpaUtil.wrapper(new SqlWrapper<>(UserEntity.class)
                 .eq(UserEntity::getId,uId,true)
                 .eq(UserEntity::getWId,wId,true)
-                .eq(UserEntity::getStatus,"1"));
+                .eq(UserEntity::getStatus,"1"))
+                ;
         PermissionUtil.isTrue(userEntityList.size() == 0, ErrorCode.UserEnum.WX_USER_IS_NOT_EXIST);
         PermissionUtil.isTrue(!userEntityList.get(0).getStatus().equals("1"),ErrorCode.UserEnum.WX_STATUS_ERROR);
         return userEntityList.get(0);

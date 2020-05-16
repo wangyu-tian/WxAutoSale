@@ -3,6 +3,8 @@ package com.wx_auto_sale.utils;
 import com.wx_auto_sale.constants.ErrorCode;
 import com.wx_auto_sale.config.WxAutoException;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**

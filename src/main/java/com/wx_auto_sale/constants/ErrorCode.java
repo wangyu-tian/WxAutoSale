@@ -50,6 +50,17 @@ public interface ErrorCode {
 
     }
 
+    @Getter
+    @AllArgsConstructor
+    enum SysEnum implements IMessage{
+        TOKEN_CHECK_FAIL("900001", "token校验失败"),
+        ;
+
+        private String code;
+        private String msg;
+
+    }
+
     interface IMessage{
          String getCode();
          String getMsg();
