@@ -121,4 +121,10 @@ public class UserService {
         PermissionUtil.isTrue(!userEntityList.get(0).getStatus().equals("1"),ErrorCode.UserEnum.WX_STATUS_ERROR);
         return userEntityList.get(0);
     }
+
+
+    public UserEntity findById(String id){
+        return userRepository.findById(id).orElse(null);
+    }
+
 }

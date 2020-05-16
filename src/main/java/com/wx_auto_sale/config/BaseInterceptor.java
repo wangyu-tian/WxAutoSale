@@ -26,7 +26,7 @@ public class BaseInterceptor extends HandlerInterceptorAdapter {
         //校验规则为：前13位为时间戳，后32位为用户id。时间戳与当前时间差不能超过一分钟
         if(StringUtils.isEmpty(token) || token.length() != 45
                     || (new Date().getTime() - Long.valueOf(token.substring(0,13))) > 60000
-                    || userService.getUserById(token.substring(13),null) == null){
+                    || userService.findById(token.substring(13)) == null){
             throw new WxAutoException(TOKEN_CHECK_FAIL);
         }
         return true;

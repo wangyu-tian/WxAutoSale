@@ -10,6 +10,7 @@ import com.wx_auto_sale.wx.model.dto.response.DiscountOutDto;
 import com.wx_auto_sale.wx.model.dto.response.MerchantOutDto;
 import com.wx_auto_sale.wx.model.entity.DiscountEntity;
 import com.wx_auto_sale.wx.model.entity.MerchantEntity;
+import com.wx_auto_sale.wx.model.entity.UserEntity;
 import com.wx_auto_sale.wx.repository.MerchantRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
@@ -75,4 +76,5 @@ public class MerchantService {
         }
         return m;
     }
+
 }

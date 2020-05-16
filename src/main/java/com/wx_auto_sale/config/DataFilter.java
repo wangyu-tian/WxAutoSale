@@ -47,11 +47,15 @@ public class DataFilter implements Filter {
             String ip = httpServletRequest.getRemoteAddr();
             String method = httpServletRequest.getMethod();
             log.info("请求ip：{},请求地址：{},请求方式：{},请求参数：{}",ip,url,method,body);
-            filterChain.doFilter(requestWrapper, responseWrapper);
-            //响应参数打印
-            log.info("响应参数:{}",responseWrapper.getBody());
-            responseWrapper.flushResponse();
-            MDC.remove(SESSION_TOKEN_KEY);
+            if("POST".equals(method.toUpperCase())) {
+                filterChain.doFilter(requestWrapper, responseWrapper);
+                //响应参数打印
+                log.info("响应参数:{}", responseWrapper.getBody());
+                responseWrapper.flushResponse();
+                MDC.remove(SESSION_TOKEN_KEY);
+            }else{
+                filterChain.doFilter(requestWrapper,servletResponse);
+            }
         } catch (Exception e) {
             log.error("doFilter is error:", e);
         }
