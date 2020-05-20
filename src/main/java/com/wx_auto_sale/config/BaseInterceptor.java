@@ -18,18 +18,23 @@ import static com.wx_auto_sale.constants.ErrorCode.SysEnum.TOKEN_CHECK_FAIL;
 @Component
 public class BaseInterceptor extends HandlerInterceptorAdapter {
 
+    private UserService userService = ApplicationContextUtil.getBean(UserService.class);
+
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
-        UserService userService = ApplicationContextUtil.getBean(UserService.class);
         String token = httpServletRequest.getHeader("token");
         log.info("header token:{}",token);
+        checkToken(token);
+        return true;
+    }
+
+    private void checkToken(String token) {
         //校验规则为：前13位为时间戳，后32位为用户id。时间戳与当前时间差不能超过一分钟
         if(StringUtils.isEmpty(token) || token.length() != 45
-                    || (new Date().getTime() - Long.valueOf(token.substring(0,13))) > 60000
-                    || userService.findById(token.substring(13)) == null){
+                || (new Date().getTime() - Long.valueOf(token.substring(0,13))) > 60000
+                || userService.findById(token.substring(13)) == null){
             throw new WxAutoException(TOKEN_CHECK_FAIL);
         }
-        return true;
     }
 
     @Override

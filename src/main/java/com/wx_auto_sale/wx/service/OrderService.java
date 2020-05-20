@@ -136,7 +136,9 @@ public class OrderService {
             }
         }
         //商户折扣
-        discountAmount = discountAmount(merchantOutDto.getDiscountOutDto(), null, discountAmount, "1");
+        if(merchantOutDto.getDiscountOutDto() != null) {
+            discountAmount = discountAmount(merchantOutDto.getDiscountOutDto(), null, discountAmount, "1");
+        }
         orderEntity.setDetail(jsonGoodsNew.toJSONString());
         orderEntity.setDiscountMemo(merchantOutDto.getDiscountOutDto()==null?null:merchantOutDto.getDiscountOutDto().getMemo());
         orderEntity.setListName(goodNames.substring(0,goodNames.length()-2));
