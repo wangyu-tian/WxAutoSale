@@ -25,7 +25,7 @@ function stop(){
     echo "$runAppName  not running..."
   else
     echo "The $runAppName is stoping..."
-    kill $appId > /dev/null 2&1
+    kill $appId > /dev/null 2>&1
     echo "stop is complete"
     echo "PID : $appId"
   fi
