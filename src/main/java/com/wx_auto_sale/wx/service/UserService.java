@@ -7,7 +7,9 @@ import com.wrapper.wrapper.SqlWrapper;
 import com.wx_auto_sale.constants.ErrorCode;
 import com.wx_auto_sale.config.ConstantConfig;
 import com.wx_auto_sale.utils.BeanUtils;
+import com.wx_auto_sale.utils.HttpUtils;
 import com.wx_auto_sale.utils.PermissionUtil;
+import com.wx_auto_sale.utils.WxUtil;
 import com.wx_auto_sale.wx.model.api.WxUser;
 import com.wx_auto_sale.wx.model.dto.response.UserOutDto;
 import com.wx_auto_sale.wx.model.entity.MerchantEntity;
@@ -51,8 +53,9 @@ public class UserService {
 
     /**
      * 小程序用户校验：通过微信code获取用户信息
+     *
      * @param wxCode
-     * @param mId 商户ID
+     * @param mId    商户ID
      * @return
      */
     @Transient
@@ -62,9 +65,8 @@ public class UserService {
 
         //通过商户信息获取微信用户ID
         UserEntity user = null;
-        JSONObject responseData = getOpenIdByWxData(wxCode,merchantEntity);
+        JSONObject responseData = getUserByWxHttp(wxCode, merchantEntity);
         String openId = responseData.getString("openid");
-        PermissionUtil.isNull(openId, ErrorCode.UserEnum.WX_CODE_ERROR);
         //通过微信用户ID查询用户信息
         SqlWrapper<UserEntity> sqlWrapper = new SqlWrapper<>(UserEntity.class);
         sqlWrapper.eq(UserEntity::getWId, openId);
@@ -86,44 +88,48 @@ public class UserService {
         return userOutDto;
     }
 
-    private JSONObject getOpenIdByWxData(String wxCode, MerchantEntity merchantEntity) {
-        WxUser wxUser = new WxUser();
-        wxUser.setAppid(merchantEntity.getAppid());
-        wxUser.setGrant_type(ConstantConfig.wxgrantType);
-        wxUser.setSecret(merchantEntity.getSecret());
-        wxUser.setJs_code(wxCode);
-        log.info("请求微信用户ID：{}", JSON.toJSONString(wxUser));
-        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
-        postParameters.setAll(JSONObject.toJavaObject(JSON.parseObject(JSON.toJSONString(wxUser)), Map.class));
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/x-www-form-urlencoded");
-        HttpEntity<MultiValueMap<String, Object>> r = new HttpEntity<>(postParameters, headers);
-        String responseData = restTemplate.postForObject(ConstantConfig.wxUserUrl, r, String.class);
-        log.info("微信鉴权接口响应:{}", responseData);
-        return JSON.parseObject(responseData);
+    /**
+     * 获取用户信息
+     *
+     * @param wxCode
+     * @param merchantEntity
+     * @return
+     */
+    private JSONObject getUserByWxHttp(String wxCode, MerchantEntity merchantEntity) {
+        JSONObject responseData = WxUtil.getOpenIdByWxData(wxCode, merchantEntity.getAppid(),merchantEntity.getSecret());
+//        String openId = responseData.getString("openid");
+//        openId = "ohoem5M7ec4DgMfAhnWFiJ0oXg0o";
+//        PermissionUtil.isNull(openId, ErrorCode.UserEnum.WX_CODE_ERROR);
+//        JSONObject accessTokenJson = WxUtil.getAccessToken(merchantEntity.getAppid(),merchantEntity.getSecret());
+//        String accessToken = accessTokenJson.getString("access_token");
+//        PermissionUtil.isNull(accessToken, ErrorCode.UserEnum.WX_CODE_ERROR);
+//        JSONObject userInfoJson = WxUtil.getUserInfoByAccessToken(accessToken, openId);
+//        JSONObject data = WxUtil.pushWxMessage(accessToken,openId,null);
+        return responseData;
     }
+
 
     /**
      * 获取用户信息 任意一个都可查
+     *
      * @param uId
      * @param wId
      * @return
      */
-    public UserEntity getUserById(String uId,String wId) {
-        PermissionUtil.paramCheckFail(StringUtils.isBlank(uId)&&StringUtils.isBlank(wId), ErrorCode.UserEnum.WX_MERCHANT_NOT_EXIST,
-                uId,wId);
+    public UserEntity getUserById(String uId, String wId) {
+        PermissionUtil.paramCheckFail(StringUtils.isBlank(uId) && StringUtils.isBlank(wId), ErrorCode.UserEnum.WX_MERCHANT_NOT_EXIST,
+                uId, wId);
         List<UserEntity> userEntityList = jpaUtil.wrapper(new SqlWrapper<>(UserEntity.class)
-                .eq(UserEntity::getId,uId,true)
-                .eq(UserEntity::getWId,wId,true)
-                .eq(UserEntity::getStatus,"1"))
-                ;
+                .eq(UserEntity::getId, uId, true)
+                .eq(UserEntity::getWId, wId, true)
+                .eq(UserEntity::getStatus, "1"));
         PermissionUtil.isTrue(userEntityList.size() == 0, ErrorCode.UserEnum.WX_USER_IS_NOT_EXIST);
-        PermissionUtil.isTrue(!userEntityList.get(0).getStatus().equals("1"),ErrorCode.UserEnum.WX_STATUS_ERROR);
+        PermissionUtil.isTrue(!userEntityList.get(0).getStatus().equals("1"), ErrorCode.UserEnum.WX_STATUS_ERROR);
         return userEntityList.get(0);
     }
 
 
-    public UserEntity findById(String id){
+    public UserEntity findById(String id) {
         return userRepository.findById(id).orElse(null);
     }
 

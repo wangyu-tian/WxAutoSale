@@ -15,17 +15,40 @@ import org.springframework.stereotype.Component;
 public class ConstantConfig {
 
     //微信用户校验url
-    public static String wxUserUrl;
+    public static String wxApiUrl;
     //微信用户校验type
-    public static String wxgrantType;
+    public static String wxGrantType;
 
-    @Value("${wx.api-url}")
-    public void setWxUserUrl(String wxUserUrl) {
+    //微信鉴权token url
+    public static String wxTokenUrl;
+    //微信用户校验type
+    public static String wxTokenGrantType;
+
+    //微信用户获取url
+    public static String wxUserUrl;
+
+    @Value("${wx.user-url}")
+    public  void setWxUserUrl(String wxUserUrl) {
         ConstantConfig.wxUserUrl = wxUserUrl;
     }
 
+    @Value("${wx.token-url}")
+    public  void setWxTokenUrl(String wxTokenUrl) {
+        ConstantConfig.wxTokenUrl = wxTokenUrl;
+    }
+
+    @Value("${wx.token-grant_type}")
+    public  void setWxTokenGrantType(String wxTokenGrantType) {
+        ConstantConfig.wxTokenGrantType = wxTokenGrantType;
+    }
+
+    @Value("${wx.api-url}")
+    public  void setWxApiUrl(String wxApiUrl) {
+        ConstantConfig.wxApiUrl = wxApiUrl;
+    }
+
     @Value("${wx.grant_type}")
-    public  void setWxgrantType(String wxgrantType) {
-        ConstantConfig.wxgrantType = wxgrantType;
+    public  void setWxGrantType(String wxGrantType) {
+        ConstantConfig.wxGrantType = wxGrantType;
     }
 }

@@ -1,5 +1,6 @@
 package com.wx_auto_sale.wx.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wrapper.constants.SqlWrapperConfig;
 import com.wrapper.util.JpaUtil;
@@ -9,11 +10,13 @@ import com.wx_auto_sale.config.WxAutoException;
 import com.wx_auto_sale.constants.DataEnum;
 import com.wx_auto_sale.utils.BeanUtils;
 import com.wx_auto_sale.utils.PermissionUtil;
+import com.wx_auto_sale.utils.WxUtil;
 import com.wx_auto_sale.wx.model.dto.PageDto;
 import com.wx_auto_sale.wx.model.dto.request.OrderInDto;
 import com.wx_auto_sale.wx.model.dto.response.*;
 import com.wx_auto_sale.wx.model.entity.OrderEntity;
 import com.wx_auto_sale.wx.model.entity.OrderUserEntity;
+import com.wx_auto_sale.wx.model.entity.UserEntity;
 import com.wx_auto_sale.wx.repository.OrderRepository;
 import com.wx_auto_sale.wx.repository.OrderUserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +60,9 @@ public class OrderService {
     @Autowired
     private OrderUserRepository orderUserRepository;
 
+    @Autowired
+    private UserService userService;
+
     public OrderOutDto uAdd(String mId, String uId, OrderInDto orderInDto) {
         //新增订单
         OrderEntity orderEntityReqNo = getOrderByRequestNo(orderInDto.getReqNo(), mId);
@@ -74,11 +80,33 @@ public class OrderService {
         //保存订单用户信息数据
         orderUserRepository.save(createOrderUser(orderEntity));
         PermissionUtil.isTrue(!isLegal, AMOUNT_IS_NOT_LEGAL);
+        UserEntity userEntity = userService.findById(uId);
+
+        //推送数据
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("character_string1", orderEntity.getCode());
+        jsonObject.put("thing4", orderEntity.getListName().length() > 10 ? orderEntity.getListName().substring(0,10) : orderEntity.getListName());
+        jsonObject.put("number5", JSONObject.parseObject(orderEntity.getDetail()).size());
+        jsonObject.put("amount2", orderEntity.getDiscountAmount());
+        jsonObject.put("thing3", orderEntity.getUMemo());
+        JSONObject jsonData = null;
+        try {
+            jsonData = WxUtil.pushWxMessage(
+                    WxUtil.getAccessToken(merchantOutDto.getAppid(), merchantOutDto.getSecret()).getString("access_token"),
+                    userEntity.getWId(),
+                    jsonObject);
+        } catch (Exception e) {
+            log.error("推送信息出错:", e);
+        } finally {
+            log.info("推送消息结果：{}", JSON.toJSONString(jsonData));
+        }
+
         return BeanUtils.copyProperties(orderEntity, OrderOutDto.class);
     }
 
     /**
      * 订单用户信息
+     *
      * @param orderEntity
      * @return
      */
@@ -107,7 +135,7 @@ public class OrderService {
         //查看已购买商品
         String detail = orderEntity.getDetail();
         JSONObject jsonGoods = JSONObject.parseObject(detail);
-        JSONObject jsonGoodsNew =  JSONObject.parseObject(detail);
+        JSONObject jsonGoodsNew = JSONObject.parseObject(detail);
         List<CommodityOutDto> commodityOutDtoList = goodsService.getByIds(new ArrayList<>(jsonGoods.keySet()));
         PermissionUtil.isTrue(commodityOutDtoList.size() != jsonGoods.size(), GOOD_IS_NOT_LEGAL);
         //订单金额
@@ -129,19 +157,19 @@ public class OrderService {
                     discountAmount = discountAmount.add(discountAmountTemp);
                     //拼接订单信息
                     //count数量;price单价;orderAmount商品原价;discountAmount商品折扣价;name商品名称;imageUrl商品地址:discountMemo商品折扣描述
-                    jsonGoodsNew.put(key,jsonGoods.get(key)+";"+dto.getPrice()+";"+orderAmountTemp+";"
-                            +discountAmountTemp+";"+dto.getName()+";"+dto.getImageUrl()+";"+(dto.getDiscountOutDto()==null?"":dto.getDiscountOutDto().getMemo()));
-                    goodNames+=dto.getName()+",";
+                    jsonGoodsNew.put(key, jsonGoods.get(key) + ";" + dto.getPrice() + ";" + orderAmountTemp + ";"
+                            + discountAmountTemp + ";" + dto.getName() + ";" + dto.getImageUrl() + ";" + (dto.getDiscountOutDto() == null ? "" : dto.getDiscountOutDto().getMemo()));
+                    goodNames += dto.getName() + ",";
                 }
             }
         }
         //商户折扣
-        if(merchantOutDto.getDiscountOutDto() != null) {
+        if (merchantOutDto.getDiscountOutDto() != null) {
             discountAmount = discountAmount(merchantOutDto.getDiscountOutDto(), null, discountAmount, "1");
         }
         orderEntity.setDetail(jsonGoodsNew.toJSONString());
-        orderEntity.setDiscountMemo(merchantOutDto.getDiscountOutDto()==null?null:merchantOutDto.getDiscountOutDto().getMemo());
-        orderEntity.setListName(goodNames.substring(0,goodNames.length()-2));
+        orderEntity.setDiscountMemo(merchantOutDto.getDiscountOutDto() == null ? null : merchantOutDto.getDiscountOutDto().getMemo());
+        orderEntity.setListName(goodNames.substring(0, goodNames.length() - 2));
         return discountAmount.compareTo(new BigDecimal(orderEntity.getDiscountAmount())) == 0
                 && orderAmount.compareTo(new BigDecimal(orderEntity.getOrderAmount())) == 0;
     }
@@ -189,8 +217,8 @@ public class OrderService {
         List<OrderEntity> orderEntityList = jpaUtil.wrapper(new SqlWrapper<>(OrderEntity.class)
                 .eq(OrderEntity::getReqNo, reqNo)
                 .eq(OrderEntity::getMId, mId));
-                //无论是否失效，都不允许出现重复的流水号
-                //.eq(OrderEntity::getValid, "1"))
+        //无论是否失效，都不允许出现重复的流水号
+        //.eq(OrderEntity::getValid, "1"))
         if (orderEntityList.size() > 0) {
             return orderEntityList.get(0);
         }
@@ -238,29 +266,30 @@ public class OrderService {
                 .eq(OrderEntity::getMId, mId)
                 .eq(OrderEntity::getUId, uId)
                 .orderBy(sqlWrapper.newOrderByModel(OrderEntity::getCreateDate, SqlWrapperConfig.Order.DESC));
-        Pageable pageable = PageRequest.of(currentPage,pageSize);
+        Pageable pageable = PageRequest.of(currentPage, pageSize);
         //分页查询
-        Page<OrderEntity> page = jpaUtil.pageWrapper(sqlWrapper,pageable);
-        List<OrderOutDto> orderOutDtoList = BeanUtils.batchModel(page.getContent(),OrderOutDto.class);
+        Page<OrderEntity> page = jpaUtil.pageWrapper(sqlWrapper, pageable);
+        List<OrderOutDto> orderOutDtoList = BeanUtils.batchModel(page.getContent(), OrderOutDto.class);
         PageDto<List<OrderOutDto>> pageDto = new PageDto<>(page.getTotalElements()
-                ,page.getTotalPages()
-                ,orderOutDtoList);
+                , page.getTotalPages()
+                , orderOutDtoList);
         return pageDto;
     }
 
     /**
      * 查询订单用户信息
+     *
      * @param uId
      * @param mId
      * @return
      */
     public OrderUserDto findOrderUserInfoBest(String uId, String mId) {
         SqlWrapper<OrderUserEntity> sqlWrapper = new SqlWrapper<>(OrderUserEntity.class);
-        sqlWrapper.eq(OrderUserEntity::getUId,uId)
-                .eq(OrderUserEntity::getMId,mId)
-                .eq(OrderUserEntity::getValid,"1")
-                .orderBy(sqlWrapper.newOrderByModel(OrderUserEntity::getCreateDate,SqlWrapperConfig.Order.DESC));
-        OrderUserEntity orderUserEntity = jpaUtil.one(sqlWrapper.getHql(),sqlWrapper.getParamsMap());
-        return BeanUtils.copyProperties(orderUserEntity,OrderUserDto.class);
+        sqlWrapper.eq(OrderUserEntity::getUId, uId)
+                .eq(OrderUserEntity::getMId, mId)
+                .eq(OrderUserEntity::getValid, "1")
+                .orderBy(sqlWrapper.newOrderByModel(OrderUserEntity::getCreateDate, SqlWrapperConfig.Order.DESC));
+        OrderUserEntity orderUserEntity = jpaUtil.one(sqlWrapper.getHql(), sqlWrapper.getParamsMap());
+        return BeanUtils.copyProperties(orderUserEntity, OrderUserDto.class);
     }
 }

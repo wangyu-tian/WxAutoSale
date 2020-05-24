@@ -45,6 +45,10 @@ public class MerchantOutDto extends BaseOutDto{
 
     private Date dDateEnd;
 
+    private String appid;
+
+    private String secret;
+
     private DiscountOutDto discountOutDto;
 
     public void setId(String id){

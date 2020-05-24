@@ -1,6 +1,9 @@
 package com.wx_auto_sale.wx.model.api;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
+
+import java.util.Map;
 
 /**
  * @Author wangyu
@@ -17,4 +20,17 @@ public class WxUser {
     private String js_code;
 
     private String grant_type;
+
+    private String access_token;
+
+    private String openid;
+
+    //微信消息推送
+    private String touser;//用户openid
+    private String template_id;//订阅消息模版id
+    private String page = "pages/index/index";//默认跳到小程序首页
+    private String miniprogram_state = "developer";//跳转页面适用于开发者小程序
+    private Map<String, JSONObject> data;//推送文字
+
 }
+
