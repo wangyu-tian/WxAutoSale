@@ -19,14 +19,14 @@ import java.util.Map;
 @Slf4j
 public class WxUtil {
 
-    public static JSONObject pushWxMessage(String accessToken, String openId,JSONObject jsonData) {
+    public static JSONObject pushWxMessage(String accessToken, String openId,JSONObject jsonData,String pushPageParams) {
         //这里简单起见我们每次都获取最新的access_token（时间开发中，应该在access_token快过期时再重新获取）
         String url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + accessToken;
         //拼接推送的模版
         WxUser wxUser = new WxUser();
         wxUser.setTouser(openId);//用户的openid（要发送给那个用户，通常这里应该动态传进来的）
         wxUser.setTemplate_id("PKV0Gk3Sa90lphIa2MtcqAzJJv8I7dNP0LjBJ5Nx3G4");//订阅消息模板id
-        wxUser.setPage("pages/index/index");
+        wxUser.setPage("pages/order/index?"+pushPageParams);
 
         Map<String, JSONObject> params = new HashMap<>(3);
         //订单号
@@ -97,11 +97,4 @@ public class WxUtil {
         return JSON.parseObject(responseData);
     }
 
-    /**
-     * 消息推送
-     * @param orderOutDto
-     */
-    public static void pushWxMessage(OrderOutDto orderOutDto) {
-
-    }
 }

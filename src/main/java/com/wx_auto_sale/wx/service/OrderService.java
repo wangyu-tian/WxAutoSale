@@ -85,7 +85,7 @@ public class OrderService {
         //推送数据
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("character_string1", orderEntity.getCode());
-        jsonObject.put("thing4", orderEntity.getListName().length() > 10 ? orderEntity.getListName().substring(0,10) : orderEntity.getListName());
+        jsonObject.put("thing4", orderEntity.getListName().length() > 20 ? orderEntity.getListName().substring(0,17)+"..." : orderEntity.getListName());
         jsonObject.put("number5", JSONObject.parseObject(orderEntity.getDetail()).size());
         jsonObject.put("amount2", orderEntity.getDiscountAmount());
         jsonObject.put("thing3", orderEntity.getUMemo());
@@ -94,7 +94,8 @@ public class OrderService {
             jsonData = WxUtil.pushWxMessage(
                     WxUtil.getAccessToken(merchantOutDto.getAppid(), merchantOutDto.getSecret()).getString("access_token"),
                     userEntity.getWId(),
-                    jsonObject);
+                    jsonObject,
+                    transformPushPageParams(mId,uId));
         } catch (Exception e) {
             log.error("推送信息出错:", e);
         } finally {
@@ -102,6 +103,22 @@ public class OrderService {
         }
 
         return BeanUtils.copyProperties(orderEntity, OrderOutDto.class);
+    }
+
+
+    /**
+     * 组合推送跳转地址参数
+     * @param mId
+     * @param uId
+     * @return
+     */
+    private String transformPushPageParams(String mId,String uId) {
+
+        PageDto<List<OrderOutDto>> pageDto = pageList(mId,uId,0,1);
+        OrderOutDto orderOutDto = pageDto.getData().get(0);
+        StringBuilder sb = new StringBuilder("type=2");
+        sb.append("&orderInfo=").append(JSON.toJSONString(orderOutDto));
+        return sb.toString();
     }
 
     /**
@@ -240,7 +257,7 @@ public class OrderService {
         orderEntity.setMsg(null);
         orderEntity.setOrderAmount(orderInDto.getOrderAmount());
         orderEntity.setPayAmount(null);
-        orderEntity.setCode(new SimpleDateFormat("MMddHHmmss").format(new Date()));
+        orderEntity.setCode(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()).substring(2));
         orderEntity.setPhone(orderInDto.getPhone());
         orderEntity.setName(orderInDto.getName());
         orderEntity.setReqNo(orderInDto.getReqNo());
