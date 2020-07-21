@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -63,6 +64,7 @@ public class OrderService {
     @Autowired
     private UserService userService;
 
+    @Transactional
     public OrderOutDto uAdd(String mId, String uId, OrderInDto orderInDto) {
         //新增订单
         OrderEntity orderEntityReqNo = getOrderByRequestNo(orderInDto.getReqNo(), mId);
@@ -81,8 +83,11 @@ public class OrderService {
         orderUserRepository.save(createOrderUser(orderEntity));
         PermissionUtil.isTrue(!isLegal, AMOUNT_IS_NOT_LEGAL);
         UserEntity userEntity = userService.findById(uId);
+        userEntity.setName(orderInDto.getName());
+        userEntity.setPhone(orderInDto.getPhone());
+        userEntity.setAddress(orderEntity.getAddress());
+        userService.save(userEntity);
 
-        //推送数据
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("character_string1", orderEntity.getCode());
         jsonObject.put("thing4", orderEntity.getListName().length() > 20 ? orderEntity.getListName().substring(0,17)+"..." : orderEntity.getListName());
@@ -91,16 +96,24 @@ public class OrderService {
         jsonObject.put("thing3", orderEntity.getUMemo());
         JSONObject jsonData = null;
         try {
+            //推送数据到订单用户
             jsonData = WxUtil.pushWxMessage(
                     WxUtil.getAccessToken(merchantOutDto.getAppid(), merchantOutDto.getSecret()).getString("access_token"),
                     userEntity.getWId(),
                     jsonObject,
                     transformPushPageParams(mId,uId));
+            //推送数据到商户
+            WxUtil.pushFeiGe(orderInDto.getName()+":¥ "+orderEntity.getDiscountAmount(),
+                    orderEntity.getCode(),
+                    orderEntity.getListName()
+                    );
         } catch (Exception e) {
             log.error("推送信息出错:", e);
         } finally {
             log.info("推送消息结果：{}", JSON.toJSONString(jsonData));
         }
+
+
 
         return BeanUtils.copyProperties(orderEntity, OrderOutDto.class);
     }
@@ -257,7 +270,7 @@ public class OrderService {
         orderEntity.setMsg(null);
         orderEntity.setOrderAmount(orderInDto.getOrderAmount());
         orderEntity.setPayAmount(null);
-        orderEntity.setCode(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()).substring(2));
+        orderEntity.setCode(new SimpleDateFormat("HHmmssSSS").format(new Date()));
         orderEntity.setPhone(orderInDto.getPhone());
         orderEntity.setName(orderInDto.getName());
         orderEntity.setReqNo(orderInDto.getReqNo());

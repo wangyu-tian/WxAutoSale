@@ -44,7 +44,6 @@ public class RestTemplateConfig {
      * @return
      */
     public RestTemplate getRestTemplate(RestTemplateBuilder restTemplateBuilder, boolean isProxy) {
-
         RestTemplate restTemplate = restTemplateBuilder.build();
         HttpComponentsClientHttpRequestFactory factory = null;
         HttpClientBuilder builder = HttpClientBuilder.create();

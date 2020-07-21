@@ -133,4 +133,8 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    public void save(UserEntity userEntity){
+        userRepository.save(userEntity);
+    }
+
 }

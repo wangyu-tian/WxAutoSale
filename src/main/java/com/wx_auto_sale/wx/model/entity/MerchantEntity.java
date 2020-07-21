@@ -57,6 +57,9 @@ public class MerchantEntity {
 
     private Date dDateEnd;
 
+    //商户消息推送配置信息
+    private String msgInfo;
+
     @CreatedDate
     private Date createDate;
 

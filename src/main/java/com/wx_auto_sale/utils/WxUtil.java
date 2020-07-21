@@ -2,7 +2,9 @@ package com.wx_auto_sale.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.wrapper.util.StringUtils;
 import com.wx_auto_sale.config.ConstantConfig;
+import com.wx_auto_sale.wx.model.api.FeiGe;
 import com.wx_auto_sale.wx.model.api.WxUser;
 import com.wx_auto_sale.wx.model.dto.response.OrderOutDto;
 import com.wx_auto_sale.wx.model.entity.MerchantEntity;
@@ -19,6 +21,30 @@ import java.util.Map;
 @Slf4j
 public class WxUtil {
 
+    public static boolean pushFeiGe(String name,String orderNo,String remark){
+        FeiGe feiGe = new FeiGe();
+        Map<String, JSONObject> params = new HashMap<>(3);
+        params.put("first",JSON.parseObject("{\"value\":\""+name+"\"}"));
+        params.put("order",JSON.parseObject("{\"value\":\""+orderNo+"\"}"));
+        params.put("remark",JSON.parseObject("{\"value\":\""+remark+"\"}"));
+        String url = "http://u.ifeige.cn/api/message/send";
+        feiGe.setData(params);
+        String responseData = HttpUtils.postJson(url,feiGe);
+        if(StringUtils.isNotEmpty(responseData) && "200".equals(JSON.parseObject(responseData).get("code"))){
+            return true;
+        }
+        log.warn("订单信息推送给商户失败_order:{},response:{}",orderNo,responseData);
+        return false;
+    }
+
+    /**
+     * 客户下单消息推送处理
+     * @param accessToken
+     * @param openId
+     * @param jsonData
+     * @param pushPageParams
+     * @return
+     */
     public static JSONObject pushWxMessage(String accessToken, String openId,JSONObject jsonData,String pushPageParams) {
         //这里简单起见我们每次都获取最新的access_token（时间开发中，应该在access_token快过期时再重新获取）
         String url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + accessToken;

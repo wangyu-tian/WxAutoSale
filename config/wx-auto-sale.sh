@@ -15,7 +15,7 @@ function start(){
     echo "$runAppName is running..."
   else
     echo "The $runAppName is starting..."
-      nohup java -jar $runAppName > /dev/null 2> nohup.out
+      nohup java -jar $runAppName > /dev/null 2> nohup.out$
   fi
 }
 
