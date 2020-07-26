@@ -21,7 +21,7 @@ public class BaseInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
         String token = httpServletRequest.getHeader("token");
-        log.info("header token:{}",token);
+        log.info("request_url:{}_header token:{}",httpServletRequest.getRequestURI(),token);
         checkToken(token);
         return true;
     }

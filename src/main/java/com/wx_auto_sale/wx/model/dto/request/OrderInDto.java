@@ -2,6 +2,8 @@ package com.wx_auto_sale.wx.model.dto.request;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
 
 /**
  * @Author wangyu
@@ -30,15 +32,18 @@ public class OrderInDto{
     private String deliveryFee;
 
     //派送地址
+    @NotBlank(message="地址不能为空")
     private String address;
 
     //用户联系电话
+    @NotBlank(message="手机号不能为空")
     private String phone;
 
     //期望配送时间
     private String expectDate;
 
     //用户姓名
+    @NotBlank(message="姓名不能为空")
     private String name;
 
 

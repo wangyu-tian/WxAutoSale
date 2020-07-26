@@ -21,7 +21,7 @@ import java.util.Map;
 @Slf4j
 public class WxUtil {
 
-    public static boolean pushFeiGe(String name,String orderNo,String remark){
+    public static boolean pushFeiGe(String name,String orderNo,String remark,String uri){
         FeiGe feiGe = new FeiGe();
         Map<String, JSONObject> params = new HashMap<>(3);
         params.put("first",JSON.parseObject("{\"value\":\""+name+"\"}"));
@@ -29,6 +29,7 @@ public class WxUtil {
         params.put("remark",JSON.parseObject("{\"value\":\""+remark+"\"}"));
         String url = "http://u.ifeige.cn/api/message/send";
         feiGe.setData(params);
+        feiGe.setUrl(uri);
         String responseData = HttpUtils.postJson(url,feiGe);
         if(StringUtils.isNotEmpty(responseData) && "200".equals(JSON.parseObject(responseData).get("code"))){
             return true;

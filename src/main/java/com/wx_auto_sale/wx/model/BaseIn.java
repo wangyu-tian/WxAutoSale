@@ -3,6 +3,8 @@ package com.wx_auto_sale.wx.model;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import javax.validation.Valid;
+
 /**
  * @Author wangyu
  * @Create: 2020/4/10 12:51 下午
@@ -26,6 +28,7 @@ public class BaseIn<T> {
     //每页大小
     private Integer pageSize;
 
+    @Valid
     private T data;
 
     //这里使用lombok生成的设置方法会出错，需要手动设置

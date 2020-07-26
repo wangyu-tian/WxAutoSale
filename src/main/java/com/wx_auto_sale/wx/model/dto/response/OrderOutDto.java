@@ -82,7 +82,7 @@ public class OrderOutDto  extends BaseOutDto {
 
     public void setDetail(String detail) {
         this.detail = detail;
-        count = "共"+ JSONObject.parseObject(detail).size()+"个商品";
+        count = "共"+ JSONObject.parseObject(detail).size()+"种商品";
     }
 
     public void setStatus(String status) {

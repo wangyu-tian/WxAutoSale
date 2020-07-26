@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ public class OrderController {
      * @return
      */
     @PostMapping(value = "/uAdd")
-    public BaseOut uAdd(@RequestBody BaseIn<OrderInDto> orderInDto) {
+    public BaseOut uAdd(@RequestBody @Valid BaseIn<OrderInDto> orderInDto) {
         OrderOutDto orderOutDto = orderService.uAdd(orderInDto.getMId(),orderInDto.getUId(),orderInDto.getData());
         return new BaseOut(orderOutDto);
     }

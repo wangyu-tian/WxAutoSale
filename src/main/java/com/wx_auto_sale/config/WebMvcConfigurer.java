@@ -20,13 +20,16 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 //        registry.addInterceptor(new BaseInterceptor()).addPathPatterns("/**");
+
         registry.addInterceptor(new BaseInterceptor())
+                //以下请求路径不进行拦截
                 .excludePathPatterns("/userInfo/**")
                 .excludePathPatterns("/merchant/info")
                 .excludePathPatterns("/goods/allInfo")
-                .excludePathPatterns("/static/*")
-                .excludePathPatterns("/images/*")
+                .excludePathPatterns("/static/**")
+                .excludePathPatterns("/images/**")
                 .excludePathPatterns("/order/pageList")
+                .excludePathPatterns("/view/**")
         ;
         super.addInterceptors(registry);
     }

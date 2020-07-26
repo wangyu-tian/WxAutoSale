@@ -105,7 +105,8 @@ public class OrderService {
             //推送数据到商户
             WxUtil.pushFeiGe(orderInDto.getName()+":¥ "+orderEntity.getDiscountAmount(),
                     orderEntity.getCode(),
-                    orderEntity.getListName()
+                    orderEntity.getListName(),
+                    "https://www.tx.wtianyu.com:7899/view/order/"+orderEntity.getUId()+"/"+orderEntity.getCode()
                     );
         } catch (Exception e) {
             log.error("推送信息出错:", e);
@@ -321,5 +322,19 @@ public class OrderService {
                 .orderBy(sqlWrapper.newOrderByModel(OrderUserEntity::getCreateDate, SqlWrapperConfig.Order.DESC));
         OrderUserEntity orderUserEntity = jpaUtil.one(sqlWrapper.getHql(), sqlWrapper.getParamsMap());
         return BeanUtils.copyProperties(orderUserEntity, OrderUserDto.class);
+    }
+
+    /**
+     * 查询订单
+     * @param uId
+     * @param orderCode
+     * @return
+     */
+    public OrderEntity findOrderByCode(String uId, String orderCode) {
+        SqlWrapper<OrderEntity> sqlWrapper = new SqlWrapper<>(OrderEntity.class);
+        sqlWrapper.eq(OrderEntity::getValid, "1")
+                .eq(OrderEntity::getCode, orderCode)
+                .eq(OrderEntity::getUId, uId);
+        return jpaUtil.one(sqlWrapper.getHql(),sqlWrapper.getParamsMap());
     }
 }

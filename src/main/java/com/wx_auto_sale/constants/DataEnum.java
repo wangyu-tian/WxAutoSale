@@ -13,7 +13,7 @@ public interface DataEnum {
     @Getter
     @AllArgsConstructor
     enum OrderEnum implements IMessage {
-        STATUS_1("1", "已确认"),
+        STATUS_1("1", "已确认(待支付)"),
         STATUS_2("2", "已支付"),
         STATUS_3("3", "待派送"),
         STATUS_4("4", "派送中"),
