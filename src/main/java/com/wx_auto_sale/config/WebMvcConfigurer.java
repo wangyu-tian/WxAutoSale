@@ -30,6 +30,7 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
                 .excludePathPatterns("/images/**")
                 .excludePathPatterns("/order/pageList")
                 .excludePathPatterns("/view/**")
+                .excludePathPatterns("/back/**")
         ;
         super.addInterceptors(registry);
     }

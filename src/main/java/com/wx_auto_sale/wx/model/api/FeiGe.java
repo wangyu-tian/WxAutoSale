@@ -2,6 +2,8 @@ package com.wx_auto_sale.wx.model.api;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -11,15 +13,22 @@ import java.util.Map;
  * @Description: http://u.ifeige.cn/
  */
 @Data
+@Component
 public class FeiGe {
 
-    private String secret = "4bcec35b41582245602b6de9dfa1849f";
+    @Value("${feige.secret}")
+    private String secret;
 
-    private String app_key = "e05d96188a39752534ca7bf096f76c06";
+    @Value("${feige.app_key}")
+    private String app_key;
 
-    private String template_id = "UZvQwUiQeY-scmoMsi-IOeR_DNW6ZLs6xhnUUTWfjNw";
+    @Value("${feige.template_id}")
+    private String template_id;
 
-    private String url = "";
+    @Value("${feige.http_url}")
+    private String httpUrl;
+
+    private String url;
 
     private Map<String, JSONObject> data;//推送文字
 

@@ -3,12 +3,14 @@ package com.wx_auto_sale.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wrapper.util.StringUtils;
+import com.wx_auto_sale.config.ApplicationContextUtil;
 import com.wx_auto_sale.config.ConstantConfig;
 import com.wx_auto_sale.wx.model.api.FeiGe;
 import com.wx_auto_sale.wx.model.api.WxUser;
 import com.wx_auto_sale.wx.model.dto.response.OrderOutDto;
 import com.wx_auto_sale.wx.model.entity.MerchantEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,16 +24,17 @@ import java.util.Map;
 public class WxUtil {
 
     public static boolean pushFeiGe(String name,String orderNo,String remark,String uri){
-        FeiGe feiGe = new FeiGe();
+        FeiGe feiGe = ApplicationContextUtil.getBean(FeiGe.class);
         Map<String, JSONObject> params = new HashMap<>(3);
         params.put("first",JSON.parseObject("{\"value\":\""+name+"\"}"));
         params.put("order",JSON.parseObject("{\"value\":\""+orderNo+"\"}"));
         params.put("remark",JSON.parseObject("{\"value\":\""+remark+"\"}"));
-        String url = "http://u.ifeige.cn/api/message/send";
+        String url = feiGe.getHttpUrl();
         feiGe.setData(params);
         feiGe.setUrl(uri);
         String responseData = HttpUtils.postJson(url,feiGe);
-        if(StringUtils.isNotEmpty(responseData) && "200".equals(JSON.parseObject(responseData).get("code"))){
+        if(StringUtils.isNotEmpty(responseData) && "200".equals(JSON.parseObject(responseData).get("code").toString())){
+            log.warn("订单信息推送给商户成功_order:{},response:{}",orderNo,responseData);
             return true;
         }
         log.warn("订单信息推送给商户失败_order:{},response:{}",orderNo,responseData);
