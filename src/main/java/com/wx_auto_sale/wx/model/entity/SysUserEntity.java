@@ -40,4 +40,6 @@ public class SysUserEntity {
     @CreatedDate
     private Date createDate;
 
+    private Date updateDate;
+
 }

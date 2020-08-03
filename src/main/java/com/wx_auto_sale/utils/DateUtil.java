@@ -1,5 +1,6 @@
 package com.wx_auto_sale.utils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -10,6 +11,8 @@ import java.util.Date;
  * @Description:
  */
 public class DateUtil {
+
+    public final static String format14 = "yyyyMMddHHmmss";
 
     public static Date now(){
         return new Date();
@@ -25,5 +28,15 @@ public class DateUtil {
     public static String date2string(Date date,String format){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
         return simpleDateFormat.format(date);
+    }
+
+    public static Date string2date(String dateStr,String format){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        try {
+            return simpleDateFormat.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

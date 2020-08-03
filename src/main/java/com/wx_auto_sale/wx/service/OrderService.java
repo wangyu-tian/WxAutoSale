@@ -9,6 +9,7 @@ import com.wrapper.wrapper.SqlWrapper;
 import com.wx_auto_sale.config.WxAutoException;
 import com.wx_auto_sale.constants.DataEnum;
 import com.wx_auto_sale.utils.BeanUtils;
+import com.wx_auto_sale.utils.DateUtil;
 import com.wx_auto_sale.utils.PermissionUtil;
 import com.wx_auto_sale.utils.WxUtil;
 import com.wx_auto_sale.wx.model.dto.PageDto;
@@ -64,8 +65,13 @@ public class OrderService {
     @Autowired
     private UserService userService;
 
-    @Transactional
+    private static final int maxOrderCount = 10;
+
+    //不开启事务，对账不通过的订单也保存。
     public OrderOutDto uAdd(String mId, String uId, OrderInDto orderInDto) {
+        //查询今天已提交订单数
+        int orderCount = getOrderCountByDate(mId,uId,DateUtil.date2string(DateUtil.now(),"yyyyMMdd"));
+        PermissionUtil.isTrue(maxOrderCount < orderCount,SUBMIT_MORE_LIMIT);
         //新增订单
         OrderEntity orderEntityReqNo = getOrderByRequestNo(orderInDto.getReqNo(), mId);
         PermissionUtil.isTrue(orderEntityReqNo != null, REQUEST_NO_IS_REPEAT);
@@ -117,6 +123,23 @@ public class OrderService {
 
 
         return BeanUtils.copyProperties(orderEntity, OrderOutDto.class);
+    }
+
+    /**
+     * 根据日期获取订单
+     *
+     * @param mId
+     * @param uId
+     * @param date
+     * @return
+     */
+    private int getOrderCountByDate(String mId, String uId, String date) {
+            SqlWrapper<OrderEntity> sqlWrapper = new SqlWrapper<>(OrderEntity.class)
+                    .eq(OrderEntity::getMId,mId)
+                    .eq(OrderEntity::getUId,uId)
+                    .ge(OrderEntity::getCreateDate,DateUtil.string2date(date.concat("000000"),DateUtil.format14))
+                    .le(OrderEntity::getCreateDate,DateUtil.string2date(date.concat("235959"),DateUtil.format14));
+            return jpaUtil.count(sqlWrapper.getHql(),sqlWrapper.getParamsMap());
     }
 
 
