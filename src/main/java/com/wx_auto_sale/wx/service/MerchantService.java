@@ -77,4 +77,10 @@ public class MerchantService {
         return m;
     }
 
+    public List<MerchantEntity> getMerchantByIdList(List<String> idList) {
+        List<MerchantEntity> merchantEntityList = jpaUtil.wrapper(new SqlWrapper<>(MerchantEntity.class)
+                .in(MerchantEntity::getId,idList)
+                .eq(MerchantEntity::getValid,"1"));
+        return merchantEntityList;
+    }
 }

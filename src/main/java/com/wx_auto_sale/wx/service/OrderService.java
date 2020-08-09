@@ -8,13 +8,12 @@ import com.wrapper.util.StringUtils;
 import com.wrapper.wrapper.SqlWrapper;
 import com.wx_auto_sale.config.WxAutoException;
 import com.wx_auto_sale.constants.DataEnum;
-import com.wx_auto_sale.utils.BeanUtils;
-import com.wx_auto_sale.utils.DateUtil;
-import com.wx_auto_sale.utils.PermissionUtil;
-import com.wx_auto_sale.utils.WxUtil;
+import com.wx_auto_sale.utils.*;
+import com.wx_auto_sale.wx.model.dto.AgentThreadLocal;
 import com.wx_auto_sale.wx.model.dto.PageDto;
 import com.wx_auto_sale.wx.model.dto.request.OrderInDto;
 import com.wx_auto_sale.wx.model.dto.response.*;
+import com.wx_auto_sale.wx.model.entity.MerchantEntity;
 import com.wx_auto_sale.wx.model.entity.OrderEntity;
 import com.wx_auto_sale.wx.model.entity.OrderUserEntity;
 import com.wx_auto_sale.wx.model.entity.UserEntity;
@@ -27,12 +26,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.wx_auto_sale.constants.DataEnum.DiscountEnum.*;
 import static com.wx_auto_sale.constants.DataEnum.OrderEnum.*;
@@ -70,8 +69,8 @@ public class OrderService {
     //不开启事务，对账不通过的订单也保存。
     public OrderOutDto uAdd(String mId, String uId, OrderInDto orderInDto) {
         //查询今天已提交订单数
-        int orderCount = getOrderCountByDate(mId,uId,DateUtil.date2string(DateUtil.now(),"yyyyMMdd"));
-        PermissionUtil.isTrue(maxOrderCount < orderCount,SUBMIT_MORE_LIMIT);
+        int orderCount = getOrderCountByDate(mId, uId, DateUtil.date2string(DateUtil.now(), "yyyyMMdd"));
+        PermissionUtil.isTrue(maxOrderCount < orderCount, SUBMIT_MORE_LIMIT);
         //新增订单
         OrderEntity orderEntityReqNo = getOrderByRequestNo(orderInDto.getReqNo(), mId);
         PermissionUtil.isTrue(orderEntityReqNo != null, REQUEST_NO_IS_REPEAT);
@@ -80,7 +79,7 @@ public class OrderService {
         boolean isLegal = checkOrder(merchantOutDto, orderEntity);
         if (!isLegal) {//不合法保存非法订单
             orderEntity.setValid("0");
-            orderEntity.setMsg("金额校验不合法，已自动终止");
+            orderEntity.setMsg(DataUtil.transOrderMsg(null,"金额校验不合法，已自动终止"));
             orderEntity.setStatus(STATUS_7.getCode());
         }
         //保存订单
@@ -96,7 +95,7 @@ public class OrderService {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("character_string1", orderEntity.getCode());
-        jsonObject.put("thing4", orderEntity.getListName().length() > 20 ? orderEntity.getListName().substring(0,17)+"..." : orderEntity.getListName());
+        jsonObject.put("thing4", orderEntity.getListName().length() > 20 ? orderEntity.getListName().substring(0, 17) + "..." : orderEntity.getListName());
         jsonObject.put("number5", JSONObject.parseObject(orderEntity.getDetail()).size());
         jsonObject.put("amount2", orderEntity.getDiscountAmount());
         jsonObject.put("thing3", orderEntity.getUMemo());
@@ -107,19 +106,18 @@ public class OrderService {
                     WxUtil.getAccessToken(merchantOutDto.getAppid(), merchantOutDto.getSecret()).getString("access_token"),
                     userEntity.getWId(),
                     jsonObject,
-                    transformPushPageParams(mId,uId));
+                    transformPushPageParams(mId, uId));
             //推送数据到商户
-            WxUtil.pushFeiGe(orderInDto.getName()+":¥ "+orderEntity.getDiscountAmount(),
+            WxUtil.pushFeiGe(orderInDto.getName() + ":¥ " + orderEntity.getDiscountAmount(),
                     orderEntity.getCode(),
                     orderEntity.getListName(),
-                    "https://www.tx.wtianyu.com:7899/view/order/"+orderEntity.getUId()+"/"+orderEntity.getCode()
-                    );
+                    "https://www.tx.wtianyu.com:7899/view/order/" + orderEntity.getUId() + "/" + orderEntity.getCode()
+            );
         } catch (Exception e) {
             log.error("推送信息出错:", e);
         } finally {
             log.info("推送消息结果：{}", JSON.toJSONString(jsonData));
         }
-
 
 
         return BeanUtils.copyProperties(orderEntity, OrderOutDto.class);
@@ -134,24 +132,25 @@ public class OrderService {
      * @return
      */
     private int getOrderCountByDate(String mId, String uId, String date) {
-            SqlWrapper<OrderEntity> sqlWrapper = new SqlWrapper<>(OrderEntity.class)
-                    .eq(OrderEntity::getMId,mId)
-                    .eq(OrderEntity::getUId,uId)
-                    .ge(OrderEntity::getCreateDate,DateUtil.string2date(date.concat("000000"),DateUtil.format14))
-                    .le(OrderEntity::getCreateDate,DateUtil.string2date(date.concat("235959"),DateUtil.format14));
-            return jpaUtil.count(sqlWrapper.getHql(),sqlWrapper.getParamsMap());
+        SqlWrapper<OrderEntity> sqlWrapper = new SqlWrapper<>(OrderEntity.class)
+                .eq(OrderEntity::getMId, mId)
+                .eq(OrderEntity::getUId, uId)
+                .ge(OrderEntity::getCreateDate, DateUtil.string2date(date.concat("000000"), DateUtil.format14))
+                .le(OrderEntity::getCreateDate, DateUtil.string2date(date.concat("235959"), DateUtil.format14));
+        return jpaUtil.count(sqlWrapper.getHql(), sqlWrapper.getParamsMap());
     }
 
 
     /**
      * 组合推送跳转地址参数
+     *
      * @param mId
      * @param uId
      * @return
      */
-    private String transformPushPageParams(String mId,String uId) {
+    private String transformPushPageParams(String mId, String uId) {
 
-        PageDto<List<OrderOutDto>> pageDto = pageList(mId,uId,0,1);
+        PageDto<List<OrderOutDto>> pageDto = pageList(mId, uId, 0, 1);
         OrderOutDto orderOutDto = pageDto.getData().get(0);
         StringBuilder sb = new StringBuilder("type=2");
         sb.append("&orderInfo=").append(JSON.toJSONString(orderOutDto));
@@ -349,15 +348,73 @@ public class OrderService {
 
     /**
      * 查询订单
+     *
      * @param uId
      * @param orderCode
      * @return
      */
     public OrderEntity findOrderByCode(String uId, String orderCode) {
         SqlWrapper<OrderEntity> sqlWrapper = new SqlWrapper<>(OrderEntity.class);
-        sqlWrapper.eq(OrderEntity::getValid, "1")
-                .eq(OrderEntity::getCode, orderCode)
+        sqlWrapper.eq(OrderEntity::getCode, orderCode)
                 .eq(OrderEntity::getUId, uId);
-        return jpaUtil.one(sqlWrapper.getHql(),sqlWrapper.getParamsMap());
+        return jpaUtil.one(sqlWrapper.getHql(), sqlWrapper.getParamsMap());
+    }
+
+    /**
+     * 搜索订单
+     * @param dateRange
+     * @param orderNum
+     * @return
+     */
+    public List<OrderOutDto> search(String dateRange, String orderNum) {
+        SqlWrapper<OrderEntity> sqlWrapper = new SqlWrapper<>(OrderEntity.class);
+        if (StringUtils.isNotEmpty(dateRange)) {
+            Date startDate = DateUtil.string2date(dateRange.split(" - ")[0].concat(" 00:00:00"), DateUtil.format19);
+            Date endDate = DateUtil.string2date(dateRange.split(" - ")[1].concat(" 23:59:59"), DateUtil.format19);
+            sqlWrapper.ge(OrderEntity::getCreateDate, startDate)
+                    .le(OrderEntity::getCreateDate, endDate);
+        }else {
+            sqlWrapper.ge(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(),DateUtil.format8).concat("000000"),DateUtil.format14))
+                    .le(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(),DateUtil.format8).concat("235959"),DateUtil.format14));
+        }
+        sqlWrapper.eq(OrderEntity::getCode,orderNum,true);
+        sqlWrapper.orderBy(sqlWrapper.newOrderByModel(OrderEntity::getCreateDate,SqlWrapperConfig.Order.DESC));
+        List<OrderOutDto> orderOutDtoList = BeanUtils.batchModel(jpaUtil.wrapper(sqlWrapper),OrderOutDto.class);
+        if(CollectionUtils.isEmpty(orderOutDtoList)) return orderOutDtoList;
+        List<MerchantEntity> merchantEntityList = merchantService.getMerchantByIdList(orderOutDtoList.stream().map(OrderOutDto::getMId).collect(Collectors.toList()));
+        Map<String,MerchantEntity> merchantEntityMap = merchantEntityList.stream().collect(Collectors.toMap(MerchantEntity::getId,m->m));
+        orderOutDtoList.stream().forEach(o->{
+            o.setMName(merchantEntityMap.get(o.getMId()).getName());
+        });
+        return orderOutDtoList;
+    }
+
+    /**
+     * 更新订单
+     * @param orderInDto
+     */
+    public void update(OrderInDto orderInDto) {
+
+        DataEnum.OrderEnum orderEnum = DataEnum.OrderEnum.getOrderByCode(orderInDto.getNewStatus());
+        if(orderEnum == null) return;
+        Optional<OrderEntity> optional = orderRepository.findById(orderInDto.getOrderId());
+        OrderEntity orderEntity = optional.get();
+        orderRepository.save(orderEntity
+                .setId(orderInDto.getOrderId())
+                .setMsg(DataUtil.transOrderMsg(orderEntity.getMsg()
+                        , AgentThreadLocal.get().getUserName().concat("将订单状态由")
+                                .concat(DataEnum.OrderEnum.getMsgByCode(orderEntity.getStatus())).concat("修改为")
+                                .concat(DataEnum.OrderEnum.getMsgByCode(orderInDto.getNewStatus()))))
+                .setStatus(orderEnum.getCode())
+                .setValid(orderEnum.getValid())
+        );
+
+    }
+
+    public OrderOutDto findById(String orderId) {
+        OrderOutDto orderOutDto = BeanUtils.copyProperties(orderRepository.findById(orderId).get(),OrderOutDto.class);
+        MerchantEntity merchantEntity = merchantService.getMerchantById(orderOutDto.getMId());
+        orderOutDto.setMName(merchantEntity.getName());
+        return orderOutDto;
     }
 }

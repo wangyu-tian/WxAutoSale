@@ -1,5 +1,6 @@
 package com.wx_auto_sale.utils;
 
+import com.wrapper.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
@@ -30,5 +31,17 @@ public class DataUtil {
             e2.printStackTrace();
             return null;
         }
+    }
+
+    public static String transOrderMsg(String oldMsg,String newMsg){
+        StringBuffer sb = new StringBuffer();
+        if(StringUtils.isNotEmpty(oldMsg)){
+            sb.append(oldMsg.endsWith(";")?oldMsg:oldMsg+";");
+        }
+        sb.append(DateUtil.date2string(DateUtil.now(),DateUtil.format19))
+                .append("  ")
+                .append(newMsg)
+                .append(";");
+        return sb.toString();
     }
 }

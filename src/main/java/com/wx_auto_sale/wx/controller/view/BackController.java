@@ -1,9 +1,12 @@
 package com.wx_auto_sale.wx.controller.view;
 
 import com.wrapper.util.StringUtils;
+import com.wx_auto_sale.constants.DataEnum;
 import com.wx_auto_sale.constants.WConstants;
+import com.wx_auto_sale.utils.DateUtil;
 import com.wx_auto_sale.wx.model.dto.AgentThreadLocal;
 import com.wx_auto_sale.wx.model.entity.SysUserEntity;
+import com.wx_auto_sale.wx.service.OrderService;
 import com.wx_auto_sale.wx.service.SysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * @Author wangyu
@@ -29,7 +34,8 @@ public class BackController {
     @Autowired
     private SysUserService sysUserService;
 
-
+    @Autowired
+    private OrderService orderService;
     /**
      * 首页
      * @return
@@ -37,11 +43,17 @@ public class BackController {
     @RequestMapping(value = "/index")
     public ModelAndView index(@RequestParam(value = "page",required = false) String page) {
         ModelAndView modelAndView = new ModelAndView();
-        modelAndView.addObject("userName", AgentThreadLocal.get().getUserName());
-        modelAndView.addObject("menuPermission", WConstants.permissionMap);
-        modelAndView.addObject("page",StringUtils.isEmpty(page)?"shouye":page);
-        modelAndView.setViewName("back/index");
-
+        page = StringUtils.isEmpty(page)? DataEnum.BackPageEnum.INDEX.getCode():page;
+        modelAndView.addObject("page",page);
+        if(DataEnum.BackPageEnum.ORDER.getCode().equals(page)
+            ||DataEnum.BackPageEnum.INDEX.getCode().equals(page)){
+            String dateRange = DateUtil.date2string(DateUtil.addDate(new Date(), Calendar.DATE,-7),DateUtil.format10)
+                    +" - "+DateUtil.date2string(DateUtil.now(),DateUtil.format10);
+            modelAndView.addObject("dateRange",dateRange);
+            modelAndView.setViewName("redirect:/back/order/search");
+        }else {
+            modelAndView.setViewName("back/index");
+        }
         return modelAndView;
     }
 
@@ -59,16 +71,16 @@ public class BackController {
         return modelAndView;
     }
 
-        /**
-         * 登陆
-         * @param userName
-         * @param password
-         * @return
-         */
+    /**
+     * 登陆
+     * @param userName
+     * @param password
+     * @return
+     */
     @RequestMapping(value = "/login")
     public ModelAndView login(@RequestParam(value = "userName",required = false) String userName,
-                                      @RequestParam(value = "password",required = false) String password,
-                                      HttpServletRequest request, HttpServletResponse response) {
+                              @RequestParam(value = "password",required = false) String password,
+                              HttpServletRequest request, HttpServletResponse response) {
 
         boolean loginFirst = StringUtils.isEmpty(userName)&&StringUtils.isEmpty(password);
         String url = "";

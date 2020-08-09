@@ -17,6 +17,8 @@ public class OrderOutDto  extends BaseOutDto {
 
     private String mId;
 
+    private String mName;
+
     //请求流水号
     private String reqNo;
 
@@ -92,6 +94,6 @@ public class OrderOutDto  extends BaseOutDto {
 
     public void setId(String id){
         super._id = id;
-        this.id = null;
+        this.id = id;
     }
 }

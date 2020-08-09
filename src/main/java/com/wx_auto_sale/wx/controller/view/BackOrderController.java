@@ -1,10 +1,10 @@
 package com.wx_auto_sale.wx.controller.view;
 
-import com.wrapper.util.StringUtils;
-import com.wx_auto_sale.constants.WConstants;
-import com.wx_auto_sale.wx.model.dto.AgentThreadLocal;
-import com.wx_auto_sale.wx.model.entity.SysUserEntity;
-import com.wx_auto_sale.wx.service.SysUserService;
+import com.alibaba.fastjson.JSONObject;
+import com.wx_auto_sale.constants.DataEnum;
+import com.wx_auto_sale.wx.model.dto.request.OrderInDto;
+import com.wx_auto_sale.wx.model.dto.response.OrderOutDto;
+import com.wx_auto_sale.wx.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static com.wx_auto_sale.constants.DataEnum.BackPageEnum.ORDER_DETAIL;
 
 /**
  * @Author wangyu
@@ -27,25 +26,60 @@ import javax.servlet.http.HttpServletResponse;
 public class BackOrderController {
 
     @Autowired
-    private SysUserService sysUserService;
-
+    private OrderService orderService;
 
     /**
-     * 首页
+     * 订单页面
      * @return
      */
     @RequestMapping(value = "/search")
     public ModelAndView search(@RequestParam(value = "page") String page,
-                              @RequestParam(value = "dateRange") String dateRange,
-                              @RequestParam(value = "orderNum") String orderNum) {
+                              @RequestParam(value = "dateRange",required = false) String dateRange,
+                              @RequestParam(value = "orderNum",required = false) String orderNum) {
         ModelAndView modelAndView = new ModelAndView();
-        log.info(orderNum,dateRange);
-        modelAndView.addObject("userName", AgentThreadLocal.get().getUserName());
-        modelAndView.addObject("menuPermission", WConstants.permissionMap);
         modelAndView.addObject("page",page);
+        modelAndView.addObject("dateRange",dateRange);
+        modelAndView.addObject("orderNum",orderNum);
+        modelAndView.addObject("orderStatusMap", DataEnum.OrderEnum.toMap());
+        modelAndView.addObject("orderList",orderService.search(dateRange,orderNum));
         modelAndView.setViewName("back/index");
         return modelAndView;
     }
 
+    /**
+     * 更新订单
+     * @return
+     */
+    @RequestMapping(value = "/update")
+    public ModelAndView update(@RequestParam(value = "page") String page,
+                               @RequestParam(value = "id") String orderId,
+                               @RequestParam(value = "dateRange") String dateRange,
+                               @RequestParam(value = "orderNum") String orderNum,
+                               @RequestParam(value = "oldStatus") String oldStatus,
+                               @RequestParam(value = "newStatus") String newStatus) {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("page",page);
+        modelAndView.addObject("dateRange",dateRange);
+        modelAndView.addObject("orderNum",orderNum);
+        orderService.update(new OrderInDto().setOrderId(orderId).setOldStatus(oldStatus).setNewStatus(newStatus));
+        modelAndView.setViewName("redirect:/back/order/search");
+        return modelAndView;
+    }
+
+    /**
+     * 订单详情
+     * @return
+     */
+    @RequestMapping(value = "/detail")
+    public ModelAndView detail(@RequestParam(value = "id") String orderId) {
+
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("page",ORDER_DETAIL.getCode());
+        OrderOutDto orderOutDto = orderService.findById(orderId);
+        modelAndView.addObject("orderInfo",orderOutDto);
+        modelAndView.setViewName("back/index");
+        return modelAndView;
+    }
 
 }

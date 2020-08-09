@@ -1,7 +1,9 @@
 package com.wx_auto_sale.wx.model.dto.request;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
+import javax.persistence.Access;
 import javax.validation.constraints.NotBlank;
 
 
@@ -11,6 +13,7 @@ import javax.validation.constraints.NotBlank;
  * @Description:
  */
 @Data
+@Accessors(chain = true)
 public class OrderInDto{
 
     //请求流水号
@@ -46,5 +49,10 @@ public class OrderInDto{
     @NotBlank(message="姓名不能为空")
     private String name;
 
+    private String oldStatus;
+
+    private String newStatus;
+
+    private String orderId;
 
 }

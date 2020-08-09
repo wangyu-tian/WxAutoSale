@@ -2,6 +2,7 @@ $(document).ready(function(){
     /**
      * daterange
      */
+    //取最近一周订单，dateRange
     daterange($('.daterange'));
 
     //初始化select2-form类

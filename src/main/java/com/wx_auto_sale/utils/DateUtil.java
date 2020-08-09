@@ -12,16 +12,22 @@ import java.util.Date;
  */
 public class DateUtil {
 
+    public final static String format19 = "yyyy-MM-dd HH:mm:ss";
+
     public final static String format14 = "yyyyMMddHHmmss";
+
+    public final static String format10 = "yyyy-MM-dd";
+
+    public final static String format8 = "yyyyMMdd";
 
     public static Date now(){
         return new Date();
     }
 
-    public static Date addDate(Date date , int field , int minute){
+    public static Date addDate(Date date , int field , int offset){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.add(field,minute);
+        calendar.add(field,offset);
         return calendar.getTime();
     }
 

@@ -5,7 +5,7 @@
     <section class="content-header">
         <h1><small></small></h1>
         <ol class="breadcrumb">
-            <li><a href="/back/index?sysToken="><i class="fa fa-home"></i> 首页</a></li>
+            <li><a href="/back/index?page=shouye"><i class="fa fa-home"></i> 首页</a></li>
             <li class="active">订单管理</li>
         </ol>
     </section>
@@ -15,8 +15,8 @@
         <div class="panel-body">
             <form class="navbar-form navbar-left" role="form" id="search-form">
                 <div class="form-group">
-                    <input type="text" class="form-control daterange" readonly="" placeholder="日期"
-                           name="daterange" style="width: 200px;" value="2020-07-26 - 2020-08-02">
+                    <input type="text" id="dateRange" class="form-control daterange" readonly="" placeholder="日期"
+                           name="daterange" style="width: 200px;" value="${dateRange}">
                 </div>
                 <div class="form-group">
                           <span class="select2 select2-container select2-container--default" dir="ltr"
@@ -29,16 +29,18 @@
                             <li class="select2-search select2-search--inline">
                             <input class="select2-search__field"
                                    type="search" tabindex="-1"
+                                   id="orderNum-id"
                                    autocomplete="off"
                                    autocorrect="off"
                                    autocapitalize="off"
                                    spellcheck="false" role="textbox"
                                    placeholder="订单号"
-                                   style="width: 248px;"></li></ul></span></span><span
+                                   value="${orderNum}"
+                                   style="width: 248px;"/></li></ul></span></span><span
                                   class="dropdown-wrapper" aria-hidden="true"></span></span>
                 </div>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>搜索</button>
+                    <button type="button" id="searchOrderBtn" class="btn btn-success"><i class="fa fa-search"></i>搜索</button>
                 </div>
             </form>
         </div>
@@ -48,43 +50,56 @@
         <table id="order_list" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <thead>
             <tr>
-                <th>群组ID</th>
-                <th>群组名称</th>
-                <th>消息模板</th>
-                <th>群组app_key</th>
-                <th>简介</th>
+                <th>订单编号</th>
+                <th>商家名称</th>
+                <th>姓名</th>
+                <th>手机号码</th>
+                <th>订单金额</th>
+                <th>支付状态</th>
                 <th>创建时间</th>
-                <th>状态</th>
+                <th>订单状态</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td><a href='/project/edit/1387'>1387</a></td>
-                <td>
-                    <div class="row">
-                        <div class="col-md-9">
-                            <a href='/project/edit/1387'>功能开发组</a>
+            <c:forEach items="${orderList}" var="item">
+                <tr>
+                    <td><a href='/back/order/detail?id=${item.id}'>${item.code}</a></td>
+                    <td>${item.MName}</td>
+                    <td>${item.name}</td>
+                    <td>${item.phone}</td>
+                    <td>${item.discountAmount}</td>
+                    <td>
+                        <div class="row">
+                            <div class="col-md-9">
+                                    ${item.statusName}
+                            </div>
+                            <div class="col-md-3 btn-group dropup">
+                                <button type="button" class="btn btn-primary btn-xs dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                        style="float:right;">
+                                    修改 <i class="fa fa-cog"></i></button>
+                                <ul class="dropdown-menu  dropdown-menu-right">
+
+                                    <c:forEach items="${orderStatusMap}" var="statusItem">
+                                        <c:choose>
+                                            <c:when test="${item.status == statusItem.key}">
+                                                <li><a href="javascript:void(0)" style="color: red" onclick="alert('当前订单状态为：${statusItem.value}')">${statusItem.value}</a></li>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <li><a href="javascript:void(0)"
+                                                       onclick="var dateRange = $('#dateRange').val();var orderNum = $('#orderNum-id').val();window.location.href='/back/order/update?id=${item.id}&page=order&oldStatus=${item.status}&newStatus=${statusItem.key}&dateRange='+dateRange+'&orderNum='+orderNum;">${statusItem.value}</a></li>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+
+                                </ul>
+                            </div>
                         </div>
-                        <div class="col-md-3 btn-group dropup">
-                            <button type="button" class="btn btn-primary btn-xs dropdown-toggle"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                    style="float:right;">
-                                操作 <i class="fa fa-cog"></i></button>
-                            <ul class="dropdown-menu  dropdown-menu-right">
-                                <li><a href="javascript:void(0)"
-                                       onclick="window.location.href='/project/edit/1387';">编辑</a></li>
-                                <li><a href="javascript:void(0)" onclick="removeData('/project/delete/1387');">删除</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </td>
-                <td><a href="/project/template/1387" target="_blank" title="试一试消息">发消息</a></td>
-                <td>e05d96188a39752534ca7bf096f76c06</td>
-                <td title="开发功能测试群组">开发功能测试群组</td>
-                <td>2020-07-21 10:59:11</td>
-                <td title="">启用</td>
-            </tr>
+                    </td>
+                    <td>${item.createDate}</td>
+                    <td>${item.valid=='1'?'生效中':'已失效'}</td>
+                </tr>
+            </c:forEach>
             </tbody>
         </table>
     </div>
@@ -94,7 +109,14 @@
             $('#order_list').DataTable({
                 order: [[0, 'desc']]
             });
+
+            $("#searchOrderBtn").click(function(){
+                var dateRange = $('.daterange').val();
+                var orderNum = $('#orderNum-id').val();
+                window.location.href="/back/order/search?dateRange="+dateRange+"&orderNum="+orderNum+"&page="+"${page}";
+            });
         });
+
 
     </script>
 </div>

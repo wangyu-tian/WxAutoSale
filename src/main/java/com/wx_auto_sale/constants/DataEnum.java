@@ -3,27 +3,45 @@ package com.wx_auto_sale.constants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @Author wangyu
  * @Create: 2020/5/4 1:04 下午
  * @Description:
  */
 public interface DataEnum {
-    //1待付款，2已支付，3待派送，4派送中，5已结束，6已取消（客户取消），7已取消（商家取消）
+
     @Getter
     @AllArgsConstructor
-    enum OrderEnum implements IMessage {
-        STATUS_1("1", "已确认(待支付)"),
-        STATUS_2("2", "已支付"),
-        STATUS_3("3", "待派送"),
-        STATUS_4("4", "派送中"),
-        STATUS_5("5", "已完成"),
-        STATUS_6("6", "已取消（客户取消）"),
-        STATUS_7("7", "已取消（商家取消）"),
+    enum BackPageEnum implements IMessage {
+        INDEX("shouye","首页子页面"),
+        ORDER("order","订单列表子页面"),
+        ORDER_DETAIL("orderDetail","订单详情子页面"),
         ;
 
         private String code;
         private String msg;
+    }
+
+    //1待付款，2已支付，3待派送，4派送中，5已结束，6已取消（客户取消），7已取消（商家取消）
+    @Getter
+    @AllArgsConstructor
+    enum OrderEnum implements IMessage {
+        STATUS_1("1", "已确认(待支付)","1"),
+        STATUS_2("2", "已支付","1"),
+        STATUS_3("3", "待派送","1"),
+        STATUS_4("4", "派送中","1"),
+        STATUS_5("5", "已完成","0"),
+        STATUS_6("6", "已取消（客户取消）","0"),
+        STATUS_7("7", "已取消（商家取消）","0"),
+        ;
+
+        private String code;
+        private String msg;
+        private String valid;
 
         public static String getMsgByCode(String code){
             for (OrderEnum orderEnum: OrderEnum.values()) {
@@ -34,6 +52,22 @@ public interface DataEnum {
             return null;
         }
 
+        public static OrderEnum getOrderByCode(String code){
+            for (OrderEnum orderEnum: OrderEnum.values()) {
+                if(orderEnum.code.equals(code)){
+                    return orderEnum;
+                }
+            }
+            return null;
+        }
+
+        public static Map<String,String> toMap(){
+            Map<String,String> dataMap = new HashMap<>();
+            for (OrderEnum orderEnum: OrderEnum.values()) {
+                dataMap.put(orderEnum.getCode(),orderEnum.getMsg());
+            }
+            return dataMap;
+        }
     }
     @Getter
     @AllArgsConstructor

@@ -1,6 +1,8 @@
 package com.wx_auto_sale.wx.model.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -18,6 +20,8 @@ import java.util.Date;
 @Table(name = "order_info")
 @Entity
 @Data
+@Accessors(chain = true)
+@DynamicUpdate(true)
 public class OrderEntity {
 
     @Id

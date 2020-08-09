@@ -1,6 +1,7 @@
 package com.wx_auto_sale.config;
 
 import com.alibaba.fastjson.JSON;
+import com.wx_auto_sale.constants.WConstants;
 import com.wx_auto_sale.utils.PermissionUtil;
 import com.wx_auto_sale.wx.model.dto.AgentThreadLocal;
 import com.wx_auto_sale.wx.model.entity.SysUserEntity;
@@ -46,38 +47,29 @@ public class UserTokenAOP {
             "&&!execution(* com.wx_auto_sale.wx.controller.view.BackController.login(..)) ")
     public void pointCut(){}
 
-    /**
-     * 日志打印
-     * @param joinpoint
-     */
-    @Before(value = "pointCut()")
-    public void before(JoinPoint joinpoint) {
-        log.info("UserTokenAOP_before_args:{}", Arrays.toString(joinpoint.getArgs()));
-    }
-
-    @After(value = "pointCut()")
-    public void after(JoinPoint joinpoint) {
-        AgentThreadLocal.remove();
-        log.info("UserTokenAOP_after_args:{}", Arrays.toString(joinpoint.getArgs()));
-    }
-
     @AfterThrowing(value = "pointCut()",throwing = "object")
     public void exception(Exception object) {
-        log.info("UserTokenAOP_exception_args:", object);
+        log.info("UserTokenAOP_exception_args:", JSON.toJSONString(object));
     }
 
     @Around(value = "pointCut()")
     public ModelAndView around(ProceedingJoinPoint pjp){
+        log.info("UserTokenAOP_before_args:{}", JSON.toJSONString(pjp.getArgs()));
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String sessionId = request.getSession().getId();
         sysUserService.findByToken(sessionId);
         if(AgentThreadLocal.get() != null){
             try {
-                return (ModelAndView) pjp.proceed();
+                ModelAndView modelAndView = (ModelAndView) pjp.proceed();
+                modelAndView.addObject("menuPermission", WConstants.permissionMap);
+                modelAndView.addObject("userName", AgentThreadLocal.get().getUserName());
+                return modelAndView;
             } catch (Throwable e) {
                 log.error("UserTokenAOP_exception_error:e",e);
             }
         }
+        AgentThreadLocal.remove();
+        log.info("UserTokenAOP_after_args:{}", JSON.toJSONString(pjp.getArgs()));
         log.info("UserTokenAOP_exception_error_Session已超时，正在跳转回登录页面");
         return new ModelAndView("/back/login");
     }

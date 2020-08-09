@@ -161,6 +161,12 @@
             <jsp:include page="contain/order.jsp" flush="true"/>
         </div>
     </c:if>
+
+    <c:if test="${page=='orderDetail'}">
+        <div class="content-wrapper">
+            <jsp:include page="contain/orderDetail.jsp" flush="true"/>
+        </div>
+    </c:if>
 </div>
 </body>
 <script type='text/javascript'>
