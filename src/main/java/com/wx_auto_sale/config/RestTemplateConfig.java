@@ -34,7 +34,7 @@ import java.security.cert.X509Certificate;
 /**
  * @Author wangyu
  * @Create: 2020/4/10 3:29 下午
- * @Description:
+ * @Description: restTemplate配置
  */
 @Slf4j
 public class RestTemplateConfig {

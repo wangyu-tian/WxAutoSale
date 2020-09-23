@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 /**
  * @Author wangyu
  * @Create: 2020/4/11 9:58 上午
- * @Description:
+ * @Description: json数据反序列化解析器
  */
 @Component
 public class JacksonConfig {

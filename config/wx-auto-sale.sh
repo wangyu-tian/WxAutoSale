@@ -48,7 +48,6 @@ function status(){
 
 case $1 in start)start;;
            stop)stop;;
-           restart)restart;;
            status)status;;
            *)usage;;
          esac

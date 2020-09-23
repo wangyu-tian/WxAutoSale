@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @Author wangyu
  * @Create: 2020/4/18 10:28 上午
- * @Description:
+ * @Description: 商品信息
  */
 @RestController
 @RequestMapping("goods")

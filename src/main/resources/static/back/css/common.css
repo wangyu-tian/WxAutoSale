@@ -1,0 +1,36 @@
+.panel-body {
+    font-size: 12px;
+}
+.huge {
+    font-size: 20px;
+}
+body {
+    background-color:#fff;
+}
+
+
+.box-content.index-title{
+    position:absolute;
+    right:0px;
+    top:10px;
+    z-index:100;
+    font-size:14px;
+    background-color:#AEAEAE;
+}
+
+.btn,.form-control,.tab-pane,table,option{
+    font-size: 12px;
+}
+hr {
+    margin-top: 1px;
+}
+
+.cut {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+}
+
+input[type=checkbox] {
+    cursor: pointer;
+}

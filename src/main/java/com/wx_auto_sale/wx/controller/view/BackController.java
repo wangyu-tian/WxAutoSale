@@ -81,7 +81,7 @@ public class BackController {
     public ModelAndView login(@RequestParam(value = "userName",required = false) String userName,
                               @RequestParam(value = "password",required = false) String password,
                               HttpServletRequest request, HttpServletResponse response) {
-
+        log.info("BackController_login_userName:{},password:{}",userName,password);
         boolean loginFirst = StringUtils.isEmpty(userName)&&StringUtils.isEmpty(password);
         String url = "";
         ModelAndView modelAndView = new ModelAndView();

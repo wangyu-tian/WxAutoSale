@@ -23,6 +23,14 @@ import java.util.Map;
 @Slf4j
 public class WxUtil {
 
+    /**
+     * 飞鸽快信推送（第三方）
+     * @param name
+     * @param orderNo
+     * @param remark
+     * @param uri
+     * @return
+     */
     public static boolean pushFeiGe(String name,String orderNo,String remark,String uri){
         FeiGe feiGe = ApplicationContextUtil.getBean(FeiGe.class);
         Map<String, JSONObject> params = new HashMap<>(3);
@@ -42,7 +50,7 @@ public class WxUtil {
     }
 
     /**
-     * 客户下单消息推送处理
+     * 客户下单消息推送处理（微信自带）
      * @param accessToken
      * @param openId
      * @param jsonData

@@ -16,10 +16,10 @@
     <!-- Ionicons -->
     <link rel="stylesheet" href="//cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css">
     <!-- Theme style -->
-    <link rel="stylesheet" href="http://u.ifeige.cn/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="/static/back/css/AdminLTE.min.css">
     <!-- AdminLTE Skins. Choose a skin from the css/skins
        folder instead of downloading all of them to reduce the load. -->
-    <link rel="stylesheet" href="http://u.ifeige.cn/dist/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="/static/back/css/all-skins.min.css">
     <!-- Morris chart -->
     <link href="//cdn.bootcss.com/bootstrap-daterangepicker/2.1.24/daterangepicker.min.css" rel="stylesheet"
           type="text/css">
@@ -28,7 +28,7 @@
           type="text/css">
     <link href="//cdn.bootcss.com/select2/4.0.0/css/select2.min.css" rel="stylesheet" type="text/css">
     <link href="//cdn.bootcss.com/Ladda/1.0.0/ladda-themeless.min.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="http://u.ifeige.cn/css/common.css" type="text/css">
+    <link rel="stylesheet" href="/static/back/css/common.css" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -39,21 +39,21 @@
     <script src="//cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
     <script src="//cdn.bootcss.com/jqueryui/1.11.4/jquery-ui.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="http://u.ifeige.cn/dist/js/app.min.js"></script>
+    <script src="/static/back/js/app.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap-daterangepicker/2.1.24/moment.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap-daterangepicker/2.1.24/daterangepicker.min.js"></script>
     <script src="//cdn.bootcss.com/select2/4.0.0/js/select2.full.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap-daterangepicker/2.1.24/moment.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap-daterangepicker/2.1.24/daterangepicker.min.js"></script>
     <script src="//cdn.bootcss.com/datatables/1.10.11/js/jquery.dataTables.min.js"></script>
-    <script src="http://u.ifeige.cn/js/datatable.cn.js"></script>
+<%--    <script src="http://u.ifeige.cn/js/datatable.cn.js"></script>--%>
 
     <script src="//cdn.bootcss.com/bootstrap3-dialog/1.35.3/js/bootstrap-dialog.min.js"></script>
     <script src="//cdn.bootcss.com/bootbox.js/4.4.0/bootbox.min.js"></script>
     <script src="//cdn.bootcss.com/Ladda/1.0.0/spin.min.js"></script>
     <script src="//cdn.bootcss.com/Ladda/1.0.0/ladda.min.js"></script>
-    <script src="http://u.ifeige.cn/js/fnProcessingIndicator.js"></script>
-    <script src="/static/js/index_c.js"></script>
+    <script src="/static/back/js/fnProcessingIndicator.js"></script>
+    <script src="/static/back/js/index_c.js"></script>
 </head>
 <body class="hold-transition sidebar-mini skin-green-light">
 <div class="wrapper">

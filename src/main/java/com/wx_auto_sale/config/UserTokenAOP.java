@@ -30,7 +30,7 @@ import static com.wx_auto_sale.constants.ErrorCode.SysEnum.TOKEN_CHECK_FAIL;
 /**
  * @Author wangyu
  * @Create: 2020/7/29 10:42 下午
- * @Description:
+ * @Description: AOP token校验器
  */
 @Component
 @Aspect
@@ -40,7 +40,7 @@ public class UserTokenAOP {
     @Autowired
     private SysUserService sysUserService;
     /**
-     * 客户信息
+     * 切面排除转发控制器，登陆控制器
      */
     @Pointcut("execution(* com.wx_auto_sale.wx.controller.view..*.*(..))" +
             "&&!execution(* com.wx_auto_sale.wx.controller.view.BackController.redirect(..)) " +

@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 /**
  * @Author wangyu
  * @Create: 2020/4/11 9:12 上午
- * @Description:
+ * @Description: 全局异常处理
  */
 @ControllerAdvice
 @Slf4j

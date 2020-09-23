@@ -1,14 +1,9 @@
 package com.wx_auto_sale.config;
 
 import com.wrapper.util.StringUtils;
-import com.wx_auto_sale.utils.PermissionUtil;
 import com.wx_auto_sale.utils.StreamUtil;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.RequestFacade;
 import org.slf4j.MDC;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -20,8 +15,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
+/**
+ * 日志打印拦截器
+ */
 @WebFilter(filterName = "dataFilter", urlPatterns = {"/*"})
 @Slf4j
 public class DataFilter implements Filter {

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * @Author wangyu
  * @Create: 2020/7/26 3:34 下午
- * @Description:
+ * @Description: 外部页面查看控制器
  */
 @Controller
 @RequestMapping("view")
@@ -30,7 +30,7 @@ public class ViewController {
     private OrderService orderService;
 
     /**
-     * 查看订单页面详情
+     * 外部查看订单页面详情
      * @param uId
      * @param orderCode
      * @return

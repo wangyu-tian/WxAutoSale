@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * @Author wangyu
  * @Create: 2020/4/10 12:49 上午
- * @Description:
+ * @Description: 用户信息
  */
 @RestController
 @RequestMapping("userInfo")

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @Author wangyu
  * @Create: 2020/4/18 11:21 上午
- * @Description:
+ * @Description: 商户信息
  */
 @RestController
 @RequestMapping("merchant")
