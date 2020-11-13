@@ -175,7 +175,9 @@ public class StringUtils {
      * @return 返回解析后的字段名称
      */
     public static String resolveFieldName(String getMethodName) {
-        if(isEmpty(getMethodName))return null;
+        if(isEmpty(getMethodName)) {
+            return null;
+        }
         if (getMethodName.startsWith("get")) {
             getMethodName = getMethodName.substring(3);
         } else if (getMethodName.startsWith(IS)) {
@@ -717,7 +719,7 @@ public class StringUtils {
 
     public static boolean ignoreNull(Object value){
         return value == null ? true :
-            value instanceof String ? value.toString().trim().equals(""):false;
+            value instanceof String ? "".equals(value.toString().trim()):false;
     }
 
     /**

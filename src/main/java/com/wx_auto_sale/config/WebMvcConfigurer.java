@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 /**
  * 静态资源配置及最外层拦截装置。
  */
+@SuppressWarnings("ALL")
 @Configuration
 public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
  

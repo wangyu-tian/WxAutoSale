@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Component
 public class Scheduler{
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
     //每隔2秒执行一次
     @Scheduled(fixedRate = 2000)

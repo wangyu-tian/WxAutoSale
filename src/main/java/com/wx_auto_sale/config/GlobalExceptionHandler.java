@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public BaseOut MethodArgumentNotValidException(MethodArgumentNotValidException e,HttpServletRequest request) {
+    public BaseOut methodArgumentNotValidException(MethodArgumentNotValidException e,HttpServletRequest request) {
         log.error("MethodArgumentNotValidException:{}", DataUtil.getErrorInfoFromException(e));
         BindingResult bindingResult = e.getBindingResult();
         String errorMesssage = "校验失败:";
@@ -35,13 +35,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(WxAutoException.class)
-    public BaseOut WxAutoException(WxAutoException e,HttpServletRequest request) {
+    public BaseOut wxAutoException(WxAutoException e,HttpServletRequest request) {
         log.error("WxAutoException:{}", DataUtil.getErrorInfoFromException(e));
         return new BaseOut(e.getCode(),e.getMsg());
     }
 
     @ExceptionHandler(Exception.class)
-    public BaseOut Exception(Exception e,HttpServletRequest request) {
+    public BaseOut exception(Exception e,HttpServletRequest request) {
        log.error("Exception:{}",DataUtil.getErrorInfoFromException(e));
         return new BaseOut().error();
     }

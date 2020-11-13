@@ -14,11 +14,21 @@ import java.util.Map;
  */
 public interface DataEnum {
 
+
     @Getter
     @AllArgsConstructor
     enum BackPageEnum implements IMessage {
+        /**
+         * 首页子页面
+         */
         INDEX("shouye","首页子页面"),
+        /**
+         * 订单列表子页面
+         */
         ORDER("order","订单列表子页面"),
+        /**
+         * 订单详情子页面
+         */
         ORDER_DETAIL("orderDetail","订单详情子页面"),
         ;
 
@@ -26,16 +36,39 @@ public interface DataEnum {
         private String msg;
     }
 
-    //1待付款，2已支付，3待派送，4派送中，5已结束，6已取消（客户取消），7已取消（商家取消）
+    /**
+     * 1待付款，2已支付，3待派送，4派送中，5已结束，6已取消（客户取消），7已取消（商家取消）
+     */
     @Getter
     @AllArgsConstructor
     enum OrderEnum implements IMessage {
+        /**
+         *已确认(待支付)
+         */
         STATUS_1("1", "已确认(待支付)","1"),
+        /**
+         * 已支付
+         */
         STATUS_2("2", "已支付","1"),
+        /**
+         * 待派送
+         */
         STATUS_3("3", "待派送","1"),
+        /**
+         * 派送中
+         */
         STATUS_4("4", "派送中","1"),
+        /**
+         * 已完成
+         */
         STATUS_5("5", "已完成","0"),
+        /**
+         * 已取消（客户取消）
+         */
         STATUS_6("6", "已取消（客户取消）","0"),
+        /**
+         * 已取消（商家取消）
+         */
         STATUS_7("7", "已取消（商家取消）","0"),
         ;
 
@@ -72,11 +105,31 @@ public interface DataEnum {
     @Getter
     @AllArgsConstructor
     enum DiscountEnum implements IMessage {
-        DISCOUNT_TYPE_1("1", "满m元减n元"),//商户折扣，已使用
-        DISCOUNT_TYPE_2("2", "满m个送n个"),//商品折扣，未使用
-        DISCOUNT_TYPE_3("3", "折扣m折限购n个"),//商品折扣，已使用
-        DISCOUNT_TYPE_4("4", "满m元送n元优惠券"),//商户折扣，未使用
-        DISCOUNT_TYPE_5("5", "满m元送n折优惠券"),//商户折扣，未使用
+        /**
+         * 满m元减n元
+         * 商品折扣，已使用
+         */
+        DISCOUNT_TYPE_1("1", "满m元减n元"),
+        /**
+         * 满m个送n个
+         * 商户折扣，未使用
+         */
+        DISCOUNT_TYPE_2("2", "满m个送n个"),
+        /**
+         * 折扣m折限购n个
+         * 商品折扣，已使用
+         */
+        DISCOUNT_TYPE_3("3", "折扣m折限购n个"),
+        /**
+         * 满m元送n元优惠券
+         * 商户折扣，未使用
+         */
+        DISCOUNT_TYPE_4("4", "满m元送n元优惠券"),
+        /**
+         * 满m元送n折优惠券
+         * 商户折扣，未使用
+         */
+        DISCOUNT_TYPE_5("5", "满m元送n折优惠券"),
         ;
         private String code;
         private String msg;

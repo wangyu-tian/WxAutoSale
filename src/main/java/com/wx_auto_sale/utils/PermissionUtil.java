@@ -21,7 +21,7 @@ public class PermissionUtil {
     }
 
     public static void isNull(Object o,ErrorCode.IMessage iMessage){
-        if(o == null || o.toString().equals("")){
+        if(o == null || "".equals(o.toString())){
             throw new WxAutoException(iMessage.getCode(),iMessage.getMsg());
         }
     }
@@ -34,9 +34,9 @@ public class PermissionUtil {
      */
     public static void paramCheckFail(boolean isFail,ErrorCode.IMessage iMessage,String... params){
         if(isFail){
-            StringBuilder messageSB = new StringBuilder(iMessage.getMsg());
-            Stream.of(params).forEach(m->{messageSB.append(m).append(",");});
-            throw new WxAutoException(iMessage.getCode(),messageSB.toString());
+            StringBuilder messageSb = new StringBuilder(iMessage.getMsg());
+            Stream.of(params).forEach(m->{messageSb.append(m).append(",");});
+            throw new WxAutoException(iMessage.getCode(),messageSb.toString());
         }
     }
 }

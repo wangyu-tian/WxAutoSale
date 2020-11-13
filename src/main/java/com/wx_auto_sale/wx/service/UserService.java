@@ -124,7 +124,7 @@ public class UserService {
                 .eq(UserEntity::getWId, wId, true)
                 .eq(UserEntity::getStatus, "1"));
         PermissionUtil.isTrue(userEntityList.size() == 0, ErrorCode.UserEnum.WX_USER_IS_NOT_EXIST);
-        PermissionUtil.isTrue(!userEntityList.get(0).getStatus().equals("1"), ErrorCode.UserEnum.WX_STATUS_ERROR);
+        PermissionUtil.isTrue(!"1".equals(userEntityList.get(0).getStatus()), ErrorCode.UserEnum.WX_STATUS_ERROR);
         return userEntityList.get(0);
     }
 

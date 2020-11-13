@@ -23,6 +23,7 @@ import java.util.Map;
  * @Description: Copyright  2018 yiYuan Networks 上海义援网络科技有限公司. All rights reserved.
  * @Date 2019/3/15
  */
+@SuppressWarnings({"ALL", "AliDeprecation"})
 @Transactional(readOnly=true)
 @Repository
 public class JpaUtil{
@@ -71,7 +72,7 @@ public class JpaUtil{
    * @param requiredType
    * @return
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "AliDeprecation"})
   public <T> Page<T> page(String sql, Map<String, Object> params, Pageable pageable, Class<T> requiredType) {
     Query query = em.createQuery(sql);
     setParams(query,params);
@@ -82,7 +83,8 @@ public class JpaUtil{
     /**
      * 生成获取总数的sql
      */
-    TypedQuery<Long> cQuery = (TypedQuery<Long>) em.createQuery(QueryUtils.createCountQueryFor(sql));
+    //noinspection AliDeprecation
+    @SuppressWarnings("AliDeprecation") TypedQuery<Long> cQuery = (TypedQuery<Long>) em.createQuery(QueryUtils.createCountQueryFor(sql));
     setParams(cQuery,params);
     return PageableExecutionUtils.getPage(query.getResultList(), pageable, ()->executeCountQuery(cQuery));
     //return new PageImpl<T>(query.getResultList(), pageable, executeCountQuery(cQuery));

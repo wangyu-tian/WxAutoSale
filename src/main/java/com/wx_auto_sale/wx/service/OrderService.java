@@ -64,13 +64,13 @@ public class OrderService {
     @Autowired
     private UserService userService;
 
-    private static final int maxOrderCount = 10;
+    private static final int MAX_ORDER_COUNT = 10;
 
     //不开启事务，对账不通过的订单也保存。
     public OrderOutDto uAdd(String mId, String uId, OrderInDto orderInDto) {
         //查询今天已提交订单数
         int orderCount = getOrderCountByDate(mId, uId, DateUtil.date2string(DateUtil.now(), "yyyyMMdd"));
-        PermissionUtil.isTrue(maxOrderCount < orderCount, SUBMIT_MORE_LIMIT);
+        PermissionUtil.isTrue(MAX_ORDER_COUNT < orderCount, SUBMIT_MORE_LIMIT);
         //新增订单
         OrderEntity orderEntityReqNo = getOrderByRequestNo(orderInDto.getReqNo(), mId);
         PermissionUtil.isTrue(orderEntityReqNo != null, REQUEST_NO_IS_REPEAT);
@@ -135,8 +135,8 @@ public class OrderService {
         SqlWrapper<OrderEntity> sqlWrapper = new SqlWrapper<>(OrderEntity.class)
                 .eq(OrderEntity::getMId, mId)
                 .eq(OrderEntity::getUId, uId)
-                .ge(OrderEntity::getCreateDate, DateUtil.string2date(date.concat("000000"), DateUtil.format14))
-                .le(OrderEntity::getCreateDate, DateUtil.string2date(date.concat("235959"), DateUtil.format14));
+                .ge(OrderEntity::getCreateDate, DateUtil.string2date(date.concat(DateUtil.DATE_START), DateUtil.FORMAT_14))
+                .le(OrderEntity::getCreateDate, DateUtil.string2date(date.concat(DateUtil.DATE_END), DateUtil.FORMAT_14));
         return jpaUtil.count(sqlWrapper.getHql(), sqlWrapper.getParamsMap());
     }
 
@@ -369,18 +369,20 @@ public class OrderService {
     public List<OrderOutDto> search(String dateRange, String orderNum) {
         SqlWrapper<OrderEntity> sqlWrapper = new SqlWrapper<>(OrderEntity.class);
         if (StringUtils.isNotEmpty(dateRange)) {
-            Date startDate = DateUtil.string2date(dateRange.split(" - ")[0].concat(" 00:00:00"), DateUtil.format19);
-            Date endDate = DateUtil.string2date(dateRange.split(" - ")[1].concat(" 23:59:59"), DateUtil.format19);
+            Date startDate = DateUtil.string2date(dateRange.split(DateUtil.DATE_SPLIT_EMPTY)[0].concat(DateUtil.DATE_START_EMPTY), DateUtil.FORMAT_19);
+            Date endDate = DateUtil.string2date(dateRange.split(DateUtil.DATE_SPLIT_EMPTY)[1].concat(DateUtil.DATE_END_EMPTY), DateUtil.FORMAT_19);
             sqlWrapper.ge(OrderEntity::getCreateDate, startDate)
                     .le(OrderEntity::getCreateDate, endDate);
         }else {
-            sqlWrapper.ge(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(),DateUtil.format8).concat("000000"),DateUtil.format14))
-                    .le(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(),DateUtil.format8).concat("235959"),DateUtil.format14));
+            sqlWrapper.ge(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(),DateUtil.FORMAT_8).concat(DateUtil.DATE_START_EMPTY),DateUtil.FORMAT_14))
+                    .le(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(),DateUtil.FORMAT_8).concat(DateUtil.DATE_END_EMPTY),DateUtil.FORMAT_14));
         }
         sqlWrapper.eq(OrderEntity::getCode,orderNum,true);
         sqlWrapper.orderBy(sqlWrapper.newOrderByModel(OrderEntity::getCreateDate,SqlWrapperConfig.Order.DESC));
         List<OrderOutDto> orderOutDtoList = BeanUtils.batchModel(jpaUtil.wrapper(sqlWrapper),OrderOutDto.class);
-        if(CollectionUtils.isEmpty(orderOutDtoList)) return orderOutDtoList;
+        if(CollectionUtils.isEmpty(orderOutDtoList)) {
+            return orderOutDtoList;
+        }
         List<MerchantEntity> merchantEntityList = merchantService.getMerchantByIdList(orderOutDtoList.stream().map(OrderOutDto::getMId).collect(Collectors.toList()));
         Map<String,MerchantEntity> merchantEntityMap = merchantEntityList.stream().collect(Collectors.toMap(MerchantEntity::getId,m->m));
         orderOutDtoList.stream().forEach(o->{
@@ -396,7 +398,9 @@ public class OrderService {
     public void update(OrderInDto orderInDto) {
 
         DataEnum.OrderEnum orderEnum = DataEnum.OrderEnum.getOrderByCode(orderInDto.getNewStatus());
-        if(orderEnum == null) return;
+        if(orderEnum == null) {
+            return;
+        }
         Optional<OrderEntity> optional = orderRepository.findById(orderInDto.getOrderId());
         OrderEntity orderEntity = optional.get();
         orderRepository.save(orderEntity

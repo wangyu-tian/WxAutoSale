@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
  * Time: 10:41 AM
  * Description:
  */
+@SuppressWarnings("AliControlFlowStatementWithoutBraces")
 public abstract class AbstractSqlWrapper<T,Children extends AbstractSqlWrapper<T,Children>>
         implements SqlCompare<Children, SFunction<T,?>>,SqlModel<SFunction<T,?>> {
 
@@ -51,7 +52,9 @@ public abstract class AbstractSqlWrapper<T,Children extends AbstractSqlWrapper<T
     }
 
     private Children addCondition(SFunction<T,?> column, SqlKeyword sqlKeyword, Object value, boolean ignoreNull){
-        if(ignoreNull && StringUtils.ignoreNull(value)) return typedThis;
+        if(ignoreNull && StringUtils.ignoreNull(value)) {
+            return typedThis;
+        }
         if(column == null){
             typedThis.lambdaSqlModelList.add(new LambdaSqlModel(null,null,sqlKeyword));
             return typedThis;
@@ -72,7 +75,9 @@ public abstract class AbstractSqlWrapper<T,Children extends AbstractSqlWrapper<T
     }
 
     private String columnToString(SFunction<T,?> column) {
-        if(column == null) return null;
+        if(column == null) {
+            return null;
+        }
         return this.getColumn(LambdaUtils.resolve(column));
     }
 
@@ -139,7 +144,9 @@ public abstract class AbstractSqlWrapper<T,Children extends AbstractSqlWrapper<T
             case OR_RIGHT: orSqlLevel--;break;
             default:startBeforeSqlWordTemp = startBeforeSqlWord;startBeforeSqlWord = false;
         }
-        if(removePre)return false;
+        if(removePre) {
+            return false;
+        }
         return !startBeforeSqlWordTemp||(WrapperUtil.isZeroLevel(andSqlLevel)&&WrapperUtil.isZeroLevel(orSqlLevel));
     }
 

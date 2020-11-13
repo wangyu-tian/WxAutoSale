@@ -12,13 +12,23 @@ import java.util.Date;
  */
 public class DateUtil {
 
-    public final static String format19 = "yyyy-MM-dd HH:mm:ss";
+    public final static String FORMAT_19 = "yyyy-MM-dd HH:mm:ss";
 
-    public final static String format14 = "yyyyMMddHHmmss";
+    public final static String FORMAT_14 = "yyyyMMddHHmmss";
 
-    public final static String format10 = "yyyy-MM-dd";
+    public final static String FORMAT_10 = "yyyy-MM-dd";
 
-    public final static String format8 = "yyyyMMdd";
+    public final static String FORMAT_8 = "yyyyMMdd";
+
+    public final static String DATE_START_EMPTY = " 000000";
+
+    public final static String DATE_END_EMPTY = " 235959";
+
+    public final static String DATE_START = "000000";
+
+    public final static String DATE_END = "235959";
+
+    public final static String DATE_SPLIT_EMPTY = " - ";
 
     public static Date now(){
         return new Date();

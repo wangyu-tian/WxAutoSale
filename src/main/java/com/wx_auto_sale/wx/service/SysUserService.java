@@ -45,15 +45,14 @@ public class SysUserService {
     @Autowired
     private SysUserRepository sysUserRepository;
 
-    ThreadLocal<HashMap<String,SysUserEntity>> threadLocal = new ThreadLocal<>();
-
-
     public void save(SysUserEntity userEntity) {
         sysUserRepository.save(userEntity);
     }
 
     public SysUserEntity login( String userName, String password,String sessionId) {
-        if(StringUtils.isBlank(userName)||StringUtils.isBlank(password))return null;
+        if(StringUtils.isBlank(userName)||StringUtils.isBlank(password)) {
+            return null;
+        }
         SqlWrapper<SysUserEntity> sqlWrapper = new SqlWrapper<>(SysUserEntity.class)
                 .eq(SysUserEntity::getUserName,userName)
                 .eq(SysUserEntity::getPassword,password)
@@ -69,7 +68,9 @@ public class SysUserService {
     }
 
     public synchronized SysUserEntity findByToken(String sessionId) {
-        if(StringUtils.isBlank(sessionId))return null;
+        if(StringUtils.isBlank(sessionId)) {
+            return null;
+        }
         SqlWrapper<SysUserEntity> sqlWrapper = new SqlWrapper<>(SysUserEntity.class)
                 .eq(SysUserEntity::getSysToken,sessionId)
                 .ge(SysUserEntity::getTokenEndTime,DateUtil.date2string(DateUtil.now(),"yyyyMMddHHmmss"))

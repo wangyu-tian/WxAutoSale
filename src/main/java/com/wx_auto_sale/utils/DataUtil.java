@@ -22,7 +22,9 @@ public class DataUtil {
      */
     public static String getErrorInfoFromException(Exception e) {
         try {
-            if (e == null) return null;
+            if (e == null) {
+                return null;
+            }
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
@@ -38,7 +40,7 @@ public class DataUtil {
         if(StringUtils.isNotEmpty(oldMsg)){
             sb.append(oldMsg.endsWith(";")?oldMsg:oldMsg+";");
         }
-        sb.append(DateUtil.date2string(DateUtil.now(),DateUtil.format19))
+        sb.append(DateUtil.date2string(DateUtil.now(),DateUtil.FORMAT_19))
                 .append("  ")
                 .append(newMsg)
                 .append(";");

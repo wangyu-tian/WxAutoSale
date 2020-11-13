@@ -8,6 +8,9 @@ package com.wx_auto_sale.wx.model.dto.response;
 
 public class BaseOutDto {
 
+    /**
+     * 此处使用_开始，是为适配微信小程序字段逻辑，不予调整。
+     */
     public String _id;
 
 }

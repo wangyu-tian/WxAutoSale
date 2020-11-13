@@ -30,7 +30,9 @@ public class HttpUtils {
     //post请求
     public static String post(String url, JSONObject jsonData){
         RestTemplate restTemplate = ApplicationContextUtil.getBean(RestTemplate.class);
-        if(jsonData == null)jsonData = new JSONObject();
+        if(jsonData == null) {
+            jsonData = new JSONObject();
+        }
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.setAll(JSONObject.toJavaObject(jsonData, Map.class));
         HttpHeaders headers = new HttpHeaders();
