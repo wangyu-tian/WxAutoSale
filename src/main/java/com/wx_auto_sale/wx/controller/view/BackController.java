@@ -47,8 +47,8 @@ public class BackController {
         modelAndView.addObject("page",page);
         if(DataEnum.BackPageEnum.ORDER.getCode().equals(page)
             ||DataEnum.BackPageEnum.INDEX.getCode().equals(page)){
-            String dateRange = DateUtil.date2string(DateUtil.addDate(new Date(), Calendar.DATE,-7),DateUtil.format10)
-                    +" - "+DateUtil.date2string(DateUtil.now(),DateUtil.format10);
+            String dateRange = DateUtil.date2string(DateUtil.addDate(new Date(), Calendar.DATE,-7),DateUtil.FORMAT_10)
+                    +" - "+DateUtil.date2string(DateUtil.now(),DateUtil.FORMAT_10);
             modelAndView.addObject("dateRange",dateRange);
             modelAndView.setViewName("redirect:/back/order/search");
         }else {

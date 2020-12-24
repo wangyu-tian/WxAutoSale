@@ -26,7 +26,7 @@ public class GoodsController {
 
     /**
      * 查询用户下所有商品和分类信息
-     * @param
+     * @param baseIn
      * @return
      */
     @PostMapping(value = "/allInfo")

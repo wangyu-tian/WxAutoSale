@@ -45,7 +45,9 @@ public class OrderInDto{
     //期望配送时间
     private String expectDate;
 
-    //用户姓名
+    /**
+     * 用户姓名
+     */
     @NotBlank(message="姓名不能为空")
     private String name;
 

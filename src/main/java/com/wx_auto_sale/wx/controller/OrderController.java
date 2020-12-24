@@ -1,9 +1,7 @@
 package com.wx_auto_sale.wx.controller;
 
-import com.wx_auto_sale.utils.WxUtil;
 import com.wx_auto_sale.wx.model.BaseIn;
 import com.wx_auto_sale.wx.model.BaseOut;
-import com.wx_auto_sale.wx.model.api.TemplateData;
 import com.wx_auto_sale.wx.model.dto.PageDto;
 import com.wx_auto_sale.wx.model.dto.request.OrderInDto;
 import com.wx_auto_sale.wx.model.dto.response.OrderOutDto;
@@ -19,9 +17,10 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
+ * 订单控制器
  * @Author wangyu
  * @Create: 2020/4/18 10:28 上午
- * @Description: 订单信息
+ * @Description:
  */
 @RestController
 @RequestMapping("order")
@@ -32,11 +31,11 @@ public class OrderController {
 
     /**
      * 用户确认添加订单
-     * @param
+     * @param orderInDto
      * @return
      */
     @PostMapping(value = "/uAdd")
-    public BaseOut uAdd(@RequestBody @Valid BaseIn<OrderInDto> orderInDto) {
+    public BaseOut<OrderOutDto> uAdd(@RequestBody @Valid BaseIn<OrderInDto> orderInDto) {
         OrderOutDto orderOutDto = orderService.uAdd(orderInDto.getMId(),orderInDto.getUId(),orderInDto.getData());
         return new BaseOut(orderOutDto);
     }

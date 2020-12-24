@@ -30,7 +30,7 @@ import static com.wx_auto_sale.constants.ErrorCode.SysEnum.TOKEN_CHECK_FAIL;
 /**
  * @Author wangyu
  * @Create: 2020/7/29 10:42 下午
- * @Description: AOP token校验器
+ * @Description: AOP token校验器 后端管理功能拦截
  */
 @Component
 @Aspect

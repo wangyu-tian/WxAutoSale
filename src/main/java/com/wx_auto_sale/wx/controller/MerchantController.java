@@ -21,9 +21,10 @@ public class MerchantController {
 
     @Autowired
     private MerchantService merchantService;
+
     /**
      * 查询商户信息
-     * @param
+     * @param baseIn
      * @return
      */
     @PostMapping(value = "/info")
