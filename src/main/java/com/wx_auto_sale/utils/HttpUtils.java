@@ -3,7 +3,7 @@ package com.wx_auto_sale.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wx_auto_sale.config.ApplicationContextUtil;
-import com.wx_auto_sale.wx.model.api.FeiGe;
+import com.wx_auto_sale.wx.model.api.WxOrderNotify;
 import com.wx_auto_sale.wx.model.api.WxUser;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -56,13 +56,13 @@ public class HttpUtils {
         return responseEntity.getBody();
     }
 
-    public static String postJson(String url, FeiGe feiGe){
+    public  static <T> String postJson(String url, T t){
         RestTemplate restTemplate = ApplicationContextUtil.getBean(RestTemplate.class);
         //创建请求头
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<FeiGe> entity = new HttpEntity<FeiGe>(feiGe, headers);
+        HttpEntity<T> entity = new HttpEntity<T>(t, headers);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, entity, String.class);
         return responseEntity.getBody();//{"msg":"调用成功！","code":1}
     }

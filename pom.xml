@@ -152,6 +152,12 @@
             <version>1.4.4</version>
         </dependency>
 
+<!--        基于retrofit的接口式请求-->
+        <dependency>
+            <groupId>com.github.lianjiatech</groupId>
+            <artifactId>retrofit-spring-boot-starter</artifactId>
+            <version>2.2.2</version>
+        </dependency>
     </dependencies>
 
     <build>

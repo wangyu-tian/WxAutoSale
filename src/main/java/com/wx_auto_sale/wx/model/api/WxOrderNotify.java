@@ -14,7 +14,7 @@ import java.util.Map;
  */
 @Data
 @Component
-public class FeiGe {
+public class WxOrderNotify {
 
     @Value("${feige.secret}")
     private String secret;

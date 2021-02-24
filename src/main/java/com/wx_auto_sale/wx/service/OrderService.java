@@ -108,9 +108,12 @@ public class OrderService {
                     jsonObject,
                     transformPushPageParams(mId, uId));
             //推送数据到商户
-            WxUtil.pushFeiGe(orderInDto.getName() + ":¥ " + orderEntity.getDiscountAmount(),
+            WxUtil.pushWXNotify(orderEntity.getName(),
                     orderEntity.getCode(),
                     orderEntity.getListName(),
+                    orderEntity.getOrderAmount()+"元",
+                    orderEntity.getUMemo(),
+                    DateUtil.date2string(orderEntity.getCreateDate(),DateUtil.FORMAT_19),
                     "https://www.tx.wtianyu.com:7899/view/order/" + orderEntity.getUId() + "/" + orderEntity.getCode()
             );
         } catch (Exception e) {

@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wrapper.util.StringUtils;
 import com.wx_auto_sale.config.ApplicationContextUtil;
 import com.wx_auto_sale.config.ConstantConfig;
-import com.wx_auto_sale.wx.model.api.FeiGe;
+import com.wx_auto_sale.wx.model.api.WxOrderNotify;
 import com.wx_auto_sale.wx.model.api.WxUser;
 import com.wx_auto_sale.wx.model.dto.response.OrderOutDto;
 import com.wx_auto_sale.wx.model.entity.MerchantEntity;
@@ -24,18 +24,24 @@ import java.util.Map;
 public class WxUtil {
 
     /**
-     * 飞鸽快信推送（第三方）
-     * @param name
-     * @param orderNo
+     * 捷易快信微信推送（第三方）
+     * @param merchantName 商户名称
+     * @param orderNo 订单编号
+     * @param nameList 商品名称列表
+     * @param tradeAmount
+     * @param tradeTime
      * @param remark
      * @param uri
      * @return
      */
-    public static boolean pushFeiGe(String name,String orderNo,String remark,String uri){
-        FeiGe feiGe = ApplicationContextUtil.getBean(FeiGe.class);
+    public static boolean pushWXNotify(String merchantName, String orderNo, String nameList, String tradeAmount,String tradeTime, String remark, String uri){
+        WxOrderNotify feiGe = ApplicationContextUtil.getBean(WxOrderNotify.class);
         Map<String, JSONObject> params = new HashMap<>(3);
-        params.put("first",JSON.parseObject("{\"value\":\""+name+"\"}"));
-        params.put("order",JSON.parseObject("{\"value\":\""+orderNo+"\"}"));
+        params.put("first",JSON.parseObject("{\"value\":\""+merchantName+"\"}"));
+        params.put("keyword1",JSON.parseObject("{\"value\":\""+orderNo+"\"}"));
+        params.put("keyword2",JSON.parseObject("{\"value\":\""+nameList+"\"}"));
+        params.put("keyword3",JSON.parseObject("{\"value\":\""+tradeAmount+"\"}"));
+        params.put("keyword4",JSON.parseObject("{\"value\":\""+tradeTime+"\"}"));
         params.put("remark",JSON.parseObject("{\"value\":\""+remark+"\"}"));
         String url = feiGe.getHttpUrl();
         feiGe.setData(params);

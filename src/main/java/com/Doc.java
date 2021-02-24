@@ -14,13 +14,13 @@ import java.util.UUID;
  */
 public class Doc {
 
-    public static void main(String[] args) {
-        DocsConfig config = new DocsConfig();
-        config.setProjectPath("/Users/wangyu/IdeaProjects/Git-WxAutoSale"); // root project path
-        config.setProjectName("WxAutoSale"); // project name
-        config.setApiVersion("V1.0");       // api version
-        config.setDocsPath("/Users/wangyu/Downloads/wangyuP"); // api docs target path
-        config.setAutoGenerate(Boolean.TRUE);  // auto generate
-        Docs.buildHtmlDocs(config); // execute to generate
-    }
+//    public static void main(String[] args) {
+//        DocsConfig config = new DocsConfig();
+//        config.setProjectPath("/Users/wangyu/IdeaProjects/Git-WxAutoSale"); // root project path
+//        config.setProjectName("WxAutoSale"); // project name
+//        config.setApiVersion("V1.0");       // api version
+//        config.setDocsPath("/Users/wangyu/Downloads/wangyuP"); // api docs target path
+//        config.setAutoGenerate(Boolean.TRUE);  // auto generate
+//        Docs.buildHtmlDocs(config); // execute to generate
+//    }
 }
