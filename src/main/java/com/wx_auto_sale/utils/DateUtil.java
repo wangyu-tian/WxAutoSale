@@ -26,6 +26,8 @@ public class DateUtil {
 
     public final static String DATE_START = "000000";
 
+    public final static String DATE_HMSs = "HHmmssSSS";
+
     public final static String DATE_END = "235959";
 
     public final static String DATE_SPLIT_EMPTY = " - ";

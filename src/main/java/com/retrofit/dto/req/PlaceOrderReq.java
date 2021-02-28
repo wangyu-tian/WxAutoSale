@@ -26,7 +26,7 @@ public class PlaceOrderReq {
     @Value("${feige.secret}")
     private String secret;
 
-    private String url;
+    private String url = "https://www.tx.wtianyu.com:7899/view/order/{uid}/{code}";
 
     @lombok.Data
     @Accessors(chain = true)

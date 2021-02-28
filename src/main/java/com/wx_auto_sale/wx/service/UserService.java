@@ -5,12 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.wrapper.util.JpaUtil;
 import com.wrapper.wrapper.SqlWrapper;
 import com.wx_auto_sale.constants.ErrorCode;
-import com.wx_auto_sale.config.ConstantConfig;
 import com.wx_auto_sale.utils.BeanUtils;
-import com.wx_auto_sale.utils.HttpUtils;
 import com.wx_auto_sale.utils.PermissionUtil;
-import com.wx_auto_sale.utils.WxUtil;
-import com.wx_auto_sale.wx.model.api.WxUser;
+import com.wx_auto_sale.utils.RequestHttpUtils;
 import com.wx_auto_sale.wx.model.dto.response.UserOutDto;
 import com.wx_auto_sale.wx.model.entity.MerchantEntity;
 import com.wx_auto_sale.wx.model.entity.UserEntity;
@@ -20,16 +17,11 @@ import org.apache.commons.lang.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Transient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author wangyu
@@ -96,15 +88,15 @@ public class UserService {
      * @return
      */
     private JSONObject getUserByWxHttp(String wxCode, MerchantEntity merchantEntity) {
-        JSONObject responseData = WxUtil.getOpenIdByWxData(wxCode, merchantEntity.getAppid(),merchantEntity.getSecret());
+        JSONObject responseData = RequestHttpUtils.getOpenIdByWxData(wxCode, merchantEntity.getAppid(),merchantEntity.getSecret());
 //        String openId = responseData.getString("openid");
 //        openId = "ohoem5M7ec4DgMfAhnWFiJ0oXg0o";
 //        PermissionUtil.isNull(openId, ErrorCode.UserEnum.WX_CODE_ERROR);
-//        JSONObject accessTokenJson = WxUtil.getAccessToken(merchantEntity.getAppid(),merchantEntity.getSecret());
+//        JSONObject accessTokenJson = RequestHttpUtils.getAccessToken(merchantEntity.getAppid(),merchantEntity.getSecret());
 //        String accessToken = accessTokenJson.getString("access_token");
 //        PermissionUtil.isNull(accessToken, ErrorCode.UserEnum.WX_CODE_ERROR);
-//        JSONObject userInfoJson = WxUtil.getUserInfoByAccessToken(accessToken, openId);
-//        JSONObject data = WxUtil.pushWxMessage(accessToken,openId,null);
+//        JSONObject userInfoJson = RequestHttpUtils.getUserInfoByAccessToken(accessToken, openId);
+//        JSONObject data = RequestHttpUtils.pushWxMessage(accessToken,openId,null);
         return responseData;
     }
 

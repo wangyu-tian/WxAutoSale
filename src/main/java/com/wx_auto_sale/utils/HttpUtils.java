@@ -1,10 +1,7 @@
 package com.wx_auto_sale.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wx_auto_sale.config.ApplicationContextUtil;
-import com.wx_auto_sale.wx.model.api.WxOrderNotify;
-import com.wx_auto_sale.wx.model.api.WxUser;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,7 +10,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -24,8 +20,6 @@ import java.util.Map;
 public class HttpUtils {
 
     public static final String FORM_URLENCODED = "application/x-www-form-urlencoded";
-
-    public static final String JSON = "application/json; encoding=utf-8";
 
     //post请求
     public static String post(String url, JSONObject jsonData){

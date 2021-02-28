@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @Data
 @Accessors(chain = true)
-public class PlaceOrderResp {
+public class PlaceOrderResp extends BaseHttpResp{
 
    private String code;
 
    private String msg;
 
-//   private JSONObject data;
+   private Object data;
 }

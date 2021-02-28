@@ -18,7 +18,7 @@ public interface ErrorCode {
         AMOUNT_IS_NOT_LEGAL("300003", "订单金额校验不合法"),
         GOOD_IS_NOT_LEGAL("300004", "商品信息不合法"),
         GOOD_DISCOUNT_IS_ERROR("300005", "折扣商品异常"),
-        SUBMIT_MORE_LIMIT("300006","用户当天提交订单数超出限制(10次)"),
+        SUBMIT_MORE_LIMIT("300006","用户当天提交订单数超出限制次数"),
         ;
 
         private String code;

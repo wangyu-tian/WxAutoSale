@@ -2,19 +2,23 @@ package com.wx_auto_sale.wx.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.type.MapType;
 import com.retrofit.JyApi;
+import com.retrofit.WxApi;
 import com.retrofit.dto.req.PlaceOrderReq;
+import com.retrofit.dto.resp.BaseHttpResp;
 import com.retrofit.dto.resp.PlaceOrderResp;
+import com.retrofit.dto.resp.WxSubscribeResp;
+import com.retrofit.dto.resp.WxTokenResp;
 import com.wrapper.constants.SqlWrapperConfig;
 import com.wrapper.util.JpaUtil;
 import com.wrapper.util.StringUtils;
 import com.wrapper.wrapper.SqlWrapper;
 import com.wx_auto_sale.config.ApplicationContextUtil;
+import com.wx_auto_sale.config.ConstantConfig;
 import com.wx_auto_sale.config.WxAutoException;
 import com.wx_auto_sale.constants.DataEnum;
 import com.wx_auto_sale.utils.*;
-import com.wx_auto_sale.wx.model.BaseOut;
-import com.wx_auto_sale.wx.model.api.WxOrderNotify;
 import com.wx_auto_sale.wx.model.dto.AgentThreadLocal;
 import com.wx_auto_sale.wx.model.dto.PageDto;
 import com.wx_auto_sale.wx.model.dto.request.OrderInDto;
@@ -26,24 +30,23 @@ import com.wx_auto_sale.wx.model.entity.UserEntity;
 import com.wx_auto_sale.wx.repository.OrderRepository;
 import com.wx_auto_sale.wx.repository.OrderUserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import retrofit2.Response;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.wx_auto_sale.constants.Constants.MAX_ORDER_COUNT;
 import static com.wx_auto_sale.constants.DataEnum.DiscountEnum.*;
 import static com.wx_auto_sale.constants.DataEnum.OrderEnum.*;
 import static com.wx_auto_sale.constants.ErrorCode.OrderEnum.*;
+import static com.wx_auto_sale.constants.RequestConstants.*;
 
 /**
  * @Author wangyu
@@ -54,30 +57,36 @@ import static com.wx_auto_sale.constants.ErrorCode.OrderEnum.*;
 @Slf4j
 public class OrderService {
 
-    @Autowired
-    private JpaUtil jpaUtil;
+    private final JpaUtil jpaUtil;
 
-    @Autowired
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
-    @Autowired
-    private MerchantService merchantService;
+    private final MerchantService merchantService;
 
-    @Autowired
-    private GoodsService goodsService;
+    private final GoodsService goodsService;
 
-    @Autowired
-    private OrderUserRepository orderUserRepository;
+    private final OrderUserRepository orderUserRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Resource
-    private JyApi jyApi;
+    public OrderService(JpaUtil jpaUtil, OrderRepository orderRepository, MerchantService merchantService, GoodsService goodsService, OrderUserRepository orderUserRepository, UserService userService) {
+        this.jpaUtil = jpaUtil;
+        this.orderRepository = orderRepository;
+        this.merchantService = merchantService;
+        this.goodsService = goodsService;
+        this.orderUserRepository = orderUserRepository;
+        this.userService = userService;
+    }
 
-    private static final int MAX_ORDER_COUNT = 20;
 
-    //不开启事务，对账不通过的订单也保存。
+    /**
+     * 不开启事务，对账不通过的订单也保存。
+     *
+     * @param mId
+     * @param uId
+     * @param orderInDto
+     * @return
+     */
     public OrderOutDto uAdd(String mId, String uId, OrderInDto orderInDto) {
         //查询今天已提交订单数
         int orderCount = getOrderCountByDate(mId, uId, DateUtil.date2string(DateUtil.now(), "yyyyMMdd"));
@@ -104,20 +113,13 @@ public class OrderService {
         userEntity.setAddress(orderEntity.getAddress());
         userService.save(userEntity);
 
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("character_string1", orderEntity.getCode());
-        jsonObject.put("thing4", orderEntity.getListName().length() > 20 ? orderEntity.getListName().substring(0, 17) + "..." : orderEntity.getListName());
-        jsonObject.put("number5", JSONObject.parseObject(orderEntity.getDetail()).size());
-        jsonObject.put("amount2", orderEntity.getDiscountAmount());
-        jsonObject.put("thing3", orderEntity.getUMemo());
-        JSONObject jsonData = null;
+        BaseHttpResp wxSubscribeResp = null;
         try {
             //推送数据到订单用户
-            jsonData = WxUtil.pushWxMessage(
-                    WxUtil.getAccessToken(merchantOutDto.getAppid(), merchantOutDto.getSecret()).getString("access_token"),
-                    userEntity.getWId(),
-                    jsonObject,
-                    transformPushPageParams(mId, uId));
+            wxSubscribeResp = RequestHttpUtils.requestHttp(
+                    WxApi.class, WxApi_subscribeSend,
+                    ((WxTokenResp) RequestHttpUtils.requestHttp(WxApi.class, WxApi_getToken, ConstantConfig.wxTokenGrantType, merchantOutDto.getAppid(), merchantOutDto.getSecret())).getAccess_token(),
+                    RetrofitReqUtils.transferWxSubscribeReq(userEntity.getWId(), orderEntity, transformPushPageParams(mId, uId)));
 
             //推送数据到商户
             PlaceOrderReq placeOrderReq = ApplicationContextUtil.getBean(PlaceOrderReq.class);
@@ -128,24 +130,14 @@ public class OrderService {
                     .setKeyword3(new PlaceOrderReq.Detail().setValue(orderEntity.getOrderAmount() + "元"))
                     .setKeyword4(new PlaceOrderReq.Detail().setValue(DateUtil.date2string(orderEntity.getCreateDate(), DateUtil.FORMAT_19)))
                     .setRemark(new PlaceOrderReq.Detail().setValue(orderEntity.getUMemo())))
-                    .setUrl("https://www.tx.wtianyu.com:7899/view/order/" + orderEntity.getUId() + "/" + orderEntity.getCode());
-            Response<PlaceOrderResp> jyResponse = jyApi.groupSend(placeOrderReq);
-            log.info("jyApi.groupSend_response:{}", JSON.toJSONString(jyResponse.body()));
-
-            //            WxUtil.pushWXNotify(orderEntity.getName(),
-//                    orderEntity.getCode(),
-//                    orderEntity.getListName(),
-//                    orderEntity.getOrderAmount() + "元",
-//                    orderEntity.getUMemo(),
-//                    DateUtil.date2string(orderEntity.getCreateDate(), DateUtil.FORMAT_19),
-//                    "https://www.tx.wtianyu.com:7899/view/order/" + orderEntity.getUId() + "/" + orderEntity.getCode()
-//            );
+                    .setUrl(MessageFormatter.format(placeOrderReq.getUrl(), orderEntity.getUId(), orderEntity.getCode()).getMessage());
+            BaseHttpResp baseHttpResp = RequestHttpUtils.requestHttp(JyApi.class, JyApi_groupSend, JSONObject.parseObject(JSON.toJSONString(placeOrderReq), Map.class));
+            log.info("jyApi.groupSend_response:{}", JSON.toJSONString(baseHttpResp));
         } catch (Exception e) {
             log.error("推送信息出错:", e);
         } finally {
-            log.info("推送消息结果：{}", JSON.toJSONString(jsonData));
+            log.info("推送消息结果：{}", JSON.toJSONString(wxSubscribeResp));
         }
-
 
         return BeanUtils.copyProperties(orderEntity, OrderOutDto.class);
     }
@@ -267,7 +259,6 @@ public class OrderService {
         if (discountOutDto == null) {
             return discountAmount.add(new BigDecimal(price).multiply(new BigDecimal(count)));
         }
-
         //折扣计算规则
         if (DISCOUNT_TYPE_3.getCode().equals(discountOutDto.getType())) {
             //限购个数
@@ -320,7 +311,7 @@ public class OrderService {
         orderEntity.setMsg(null);
         orderEntity.setOrderAmount(orderInDto.getOrderAmount());
         orderEntity.setPayAmount(null);
-        orderEntity.setCode(new SimpleDateFormat("HHmmssSSS").format(new Date()));
+        orderEntity.setCode(new SimpleDateFormat(DateUtil.DATE_HMSs).format(new Date()));
         orderEntity.setPhone(orderInDto.getPhone());
         orderEntity.setName(orderInDto.getName());
         orderEntity.setReqNo(orderInDto.getReqNo());
