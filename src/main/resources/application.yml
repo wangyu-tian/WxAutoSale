@@ -1,0 +1,50 @@
+#捷信第三方推送服务
+feige:
+  app_key: 3cfcfef961953a6a5cf23a738c4365ef
+  http_url: http://jy.erpit.cn/api/message/send
+  secret: de16cfb1467aca64c2688b3ded806145
+  template_id: UvUc681NLbnE_r5dX1NJ_GxWdnIFKzUhkeLGUHhICFE
+
+#retrofit 支持
+retrofit:
+  enable-log: true
+  pool:
+    pool1:
+      max-idle-connections: 3
+      keep-alive-second: 100
+    pool2:
+      max-idle-connections: 5
+      keep-alive-second: 50
+
+
+#服务器配置信息
+server:
+  max-http-header-size: 100KB
+  port: 8080
+  servlet:
+    jsp:
+      init-parameters:
+        development: true
+    session:
+      timeout: 720m
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: wangyu123
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://120.53.18.161:3306/wx_auto_sale
+    username: root
+  jpa:
+    show-sql: true
+  mvc:
+    view:
+      prefix: /jsp/
+      suffix: .jsp
+
+#微信官方推送信息配置
+wx:
+  api-url: https://api.weixin.qq.com/sns/jscode2session
+  grant_type: authorization_code
+  token-grant_type: client_credential
+  token-url: https://api.weixin.qq.com/cgi-bin/token?grant_type={grant_type}&appid={appid}&secret={secret}
+  user-url: https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN

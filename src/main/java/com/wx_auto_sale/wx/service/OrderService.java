@@ -2,13 +2,19 @@ package com.wx_auto_sale.wx.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.retrofit.JyApi;
+import com.retrofit.dto.req.PlaceOrderReq;
+import com.retrofit.dto.resp.PlaceOrderResp;
 import com.wrapper.constants.SqlWrapperConfig;
 import com.wrapper.util.JpaUtil;
 import com.wrapper.util.StringUtils;
 import com.wrapper.wrapper.SqlWrapper;
+import com.wx_auto_sale.config.ApplicationContextUtil;
 import com.wx_auto_sale.config.WxAutoException;
 import com.wx_auto_sale.constants.DataEnum;
 import com.wx_auto_sale.utils.*;
+import com.wx_auto_sale.wx.model.BaseOut;
+import com.wx_auto_sale.wx.model.api.WxOrderNotify;
 import com.wx_auto_sale.wx.model.dto.AgentThreadLocal;
 import com.wx_auto_sale.wx.model.dto.PageDto;
 import com.wx_auto_sale.wx.model.dto.request.OrderInDto;
@@ -27,7 +33,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import retrofit2.Response;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -64,7 +72,10 @@ public class OrderService {
     @Autowired
     private UserService userService;
 
-    private static final int MAX_ORDER_COUNT = 10;
+    @Resource
+    private JyApi jyApi;
+
+    private static final int MAX_ORDER_COUNT = 20;
 
     //不开启事务，对账不通过的订单也保存。
     public OrderOutDto uAdd(String mId, String uId, OrderInDto orderInDto) {
@@ -79,7 +90,7 @@ public class OrderService {
         boolean isLegal = checkOrder(merchantOutDto, orderEntity);
         if (!isLegal) {//不合法保存非法订单
             orderEntity.setValid("0");
-            orderEntity.setMsg(DataUtil.transOrderMsg(null,"金额校验不合法，已自动终止"));
+            orderEntity.setMsg(DataUtil.transOrderMsg(null, "金额校验不合法，已自动终止"));
             orderEntity.setStatus(STATUS_7.getCode());
         }
         //保存订单
@@ -107,15 +118,28 @@ public class OrderService {
                     userEntity.getWId(),
                     jsonObject,
                     transformPushPageParams(mId, uId));
+
             //推送数据到商户
-            WxUtil.pushWXNotify(orderEntity.getName(),
-                    orderEntity.getCode(),
-                    orderEntity.getListName(),
-                    orderEntity.getOrderAmount()+"元",
-                    orderEntity.getUMemo(),
-                    DateUtil.date2string(orderEntity.getCreateDate(),DateUtil.FORMAT_19),
-                    "https://www.tx.wtianyu.com:7899/view/order/" + orderEntity.getUId() + "/" + orderEntity.getCode()
-            );
+            PlaceOrderReq placeOrderReq = ApplicationContextUtil.getBean(PlaceOrderReq.class);
+            placeOrderReq.setData(new PlaceOrderReq.Data()
+                    .setFirst(new PlaceOrderReq.Detail().setValue(orderEntity.getName()))
+                    .setKeyword1(new PlaceOrderReq.Detail().setValue(orderEntity.getCode()))
+                    .setKeyword2(new PlaceOrderReq.Detail().setValue(orderEntity.getListName()))
+                    .setKeyword3(new PlaceOrderReq.Detail().setValue(orderEntity.getOrderAmount() + "元"))
+                    .setKeyword4(new PlaceOrderReq.Detail().setValue(DateUtil.date2string(orderEntity.getCreateDate(), DateUtil.FORMAT_19)))
+                    .setRemark(new PlaceOrderReq.Detail().setValue(orderEntity.getUMemo())))
+                    .setUrl("https://www.tx.wtianyu.com:7899/view/order/" + orderEntity.getUId() + "/" + orderEntity.getCode());
+            Response<PlaceOrderResp> jyResponse = jyApi.groupSend(placeOrderReq);
+            log.info("jyApi.groupSend_response:{}", JSON.toJSONString(jyResponse.body()));
+
+            //            WxUtil.pushWXNotify(orderEntity.getName(),
+//                    orderEntity.getCode(),
+//                    orderEntity.getListName(),
+//                    orderEntity.getOrderAmount() + "元",
+//                    orderEntity.getUMemo(),
+//                    DateUtil.date2string(orderEntity.getCreateDate(), DateUtil.FORMAT_19),
+//                    "https://www.tx.wtianyu.com:7899/view/order/" + orderEntity.getUId() + "/" + orderEntity.getCode()
+//            );
         } catch (Exception e) {
             log.error("推送信息出错:", e);
         } finally {
@@ -365,6 +389,7 @@ public class OrderService {
 
     /**
      * 搜索订单
+     *
      * @param dateRange
      * @param orderNum
      * @return
@@ -376,19 +401,19 @@ public class OrderService {
             Date endDate = DateUtil.string2date(dateRange.split(DateUtil.DATE_SPLIT_EMPTY)[1].concat(DateUtil.DATE_END_EMPTY), DateUtil.FORMAT_19);
             sqlWrapper.ge(OrderEntity::getCreateDate, startDate)
                     .le(OrderEntity::getCreateDate, endDate);
-        }else {
-            sqlWrapper.ge(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(),DateUtil.FORMAT_8).concat(DateUtil.DATE_START_EMPTY),DateUtil.FORMAT_14))
-                    .le(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(),DateUtil.FORMAT_8).concat(DateUtil.DATE_END_EMPTY),DateUtil.FORMAT_14));
+        } else {
+            sqlWrapper.ge(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(), DateUtil.FORMAT_8).concat(DateUtil.DATE_START_EMPTY), DateUtil.FORMAT_14))
+                    .le(OrderEntity::getCreateDate, DateUtil.string2date(DateUtil.date2string(new Date(), DateUtil.FORMAT_8).concat(DateUtil.DATE_END_EMPTY), DateUtil.FORMAT_14));
         }
-        sqlWrapper.eq(OrderEntity::getCode,orderNum,true);
-        sqlWrapper.orderBy(sqlWrapper.newOrderByModel(OrderEntity::getCreateDate,SqlWrapperConfig.Order.DESC));
-        List<OrderOutDto> orderOutDtoList = BeanUtils.batchModel(jpaUtil.wrapper(sqlWrapper),OrderOutDto.class);
-        if(CollectionUtils.isEmpty(orderOutDtoList)) {
+        sqlWrapper.eq(OrderEntity::getCode, orderNum, true);
+        sqlWrapper.orderBy(sqlWrapper.newOrderByModel(OrderEntity::getCreateDate, SqlWrapperConfig.Order.DESC));
+        List<OrderOutDto> orderOutDtoList = BeanUtils.batchModel(jpaUtil.wrapper(sqlWrapper), OrderOutDto.class);
+        if (CollectionUtils.isEmpty(orderOutDtoList)) {
             return orderOutDtoList;
         }
         List<MerchantEntity> merchantEntityList = merchantService.getMerchantByIdList(orderOutDtoList.stream().map(OrderOutDto::getMId).collect(Collectors.toList()));
-        Map<String,MerchantEntity> merchantEntityMap = merchantEntityList.stream().collect(Collectors.toMap(MerchantEntity::getId,m->m));
-        orderOutDtoList.stream().forEach(o->{
+        Map<String, MerchantEntity> merchantEntityMap = merchantEntityList.stream().collect(Collectors.toMap(MerchantEntity::getId, m -> m));
+        orderOutDtoList.stream().forEach(o -> {
             o.setMName(merchantEntityMap.get(o.getMId()).getName());
         });
         return orderOutDtoList;
@@ -396,12 +421,13 @@ public class OrderService {
 
     /**
      * 更新订单
+     *
      * @param orderInDto
      */
     public void update(OrderInDto orderInDto) {
 
         DataEnum.OrderEnum orderEnum = DataEnum.OrderEnum.getOrderByCode(orderInDto.getNewStatus());
-        if(orderEnum == null) {
+        if (orderEnum == null) {
             return;
         }
         Optional<OrderEntity> optional = orderRepository.findById(orderInDto.getOrderId());
@@ -419,7 +445,7 @@ public class OrderService {
     }
 
     public OrderOutDto findById(String orderId) {
-        OrderOutDto orderOutDto = BeanUtils.copyProperties(orderRepository.findById(orderId).get(),OrderOutDto.class);
+        OrderOutDto orderOutDto = BeanUtils.copyProperties(orderRepository.findById(orderId).get(), OrderOutDto.class);
         MerchantEntity merchantEntity = merchantService.getMerchantById(orderOutDto.getMId());
         orderOutDto.setMName(merchantEntity.getName());
         return orderOutDto;

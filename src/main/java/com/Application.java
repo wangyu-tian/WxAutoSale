@@ -1,5 +1,6 @@
 package com;
 
+import com.github.lianjiatech.retrofit.spring.boot.annotation.RetrofitScan;
 import com.wx_auto_sale.config.RestTemplateConfig;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 @EnableScheduling
 @ServletComponentScan
+@RetrofitScan(basePackages = {"com.retrofit"})
 public class Application {
 
     public static void main(String[] args) {
